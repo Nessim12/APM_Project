@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Application — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <h1>{{ action }} Application</h1>
+        <a href="{% url 'application_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+    </div>
+
+    <div class="glass-card">
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert error" style="margin-bottom: 1.5rem;">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label>Nom *</label>
+                {{ form.nom }}
+                {% if form.nom.errors %}<ul class="errorlist">{% for e in form.nom.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Description *</label>
+                {{ form.description }}
+                {% if form.description.errors %}<ul class="errorlist">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>Criticité *</label>
+                    {{ form.criticite }}
+                    {% if form.criticite.errors %}<ul class="errorlist">{% for e in form.criticite.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Statut *</label>
+                    {{ form.statut }}
+                    {% if form.statut.errors %}<ul class="errorlist">{% for e in form.statut.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>Date de mise en production *</label>
+                    {{ form.date_mise_en_production }}
+                    {% if form.date_mise_en_production.errors %}<ul class="errorlist">{% for e in form.date_mise_en_production.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Date de fin de vie</label>
+                    {{ form.date_fin_vie }}
+                    {% if form.date_fin_vie.errors %}<ul class="errorlist">{% for e in form.date_fin_vie.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>Direction métier *</label>
+                    {{ form.direction_metier }}
+                    {% if form.direction_metier.errors %}<ul class="errorlist">{% for e in form.direction_metier.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Nombre d'utilisateurs *</label>
+                    {{ form.nombre_utilisateurs }}
+                    {% if form.nombre_utilisateurs.errors %}<ul class="errorlist">{% for e in form.nombre_utilisateurs.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <h3 style="margin: 2rem 0 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+                Gouvernance — Responsables *
+            </h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>Responsable métier</label>
+                    {{ form.responsable_metier }}
+                    {% if form.responsable_metier.errors %}<ul class="errorlist">{% for e in form.responsable_metier.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Responsable technique</label>
+                    {{ form.responsable_technique }}
+                    {% if form.responsable_technique.errors %}<ul class="errorlist">{% for e in form.responsable_technique.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Chef de projet</label>
+                    {{ form.chef_de_projet }}
+                    {% if form.chef_de_projet.errors %}<ul class="errorlist">{% for e in form.chef_de_projet.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Équipe support</label>
+                    {{ form.equipe_support }}
+                    {% if form.equipe_support.errors %}<ul class="errorlist">{% for e in form.equipe_support.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

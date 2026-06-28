@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de bord - APM{% endblock %}
+
+{% block content %}
+<div class="header-row">
+    <h1>Gestion des Utilisateurs</h1>
+    <div style="display: flex; gap: 1rem;">
+        <a href="{% url 'user_import_excel' %}" class="btn success">Import Excel</a>
+        <a href="{% url 'user_create' %}" class="btn">Nouveau Utilisateur</a>
+    </div>
+</div>
+
+<div class="glass-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Matricule</th>
+                <th>Nom Complet</th>
+                <th>Email</th>
+                <th>Département</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td><span style="font-family: monospace; color: #93c5fd;">{{ u.matricule }}</span></td>
+                <td>{{ u.first_name }} {{ u.last_name }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.departement|default:"-" }}</td>
+                <td>
+                    <span class="badge {{ u.role|lower }}">{{ u.role }}</span>
+                </td>
+                <td>
+                    {% if u.is_active %}
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #6ee7b7;">Actif</span>
+                    {% else %}
+                        <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">Inactif</span>
+                    {% endif %}
+                </td>
+                <td style="display: flex; gap: 0.5rem;">
+                    <a href="{% url 'user_update' u.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Modifier</a>
+                    <form action="{% url 'user_toggle_active' u.pk %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        {% if u.is_active %}
+                            <button type="submit" class="btn danger" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Désactiver</button>
+                        {% else %}
+                            <button type="submit" class="btn success" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Activer</button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted);">Aucun utilisateur trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
