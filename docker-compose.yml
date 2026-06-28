@@ -6,7 +6,7 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      USE_SQLITE: "1"
+      USE_SQLITE: "0"
     dns:
       - 8.8.8.8
       - 8.8.4.4

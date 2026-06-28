@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 # Local Docker dev uses SQLite (USE_SQLITE=1). Production uses Supabase PostgreSQL.
 
-USE_SQLITE = os.environ.get('USE_SQLITE', '').lower() in ('1', 'true', 'yes')
+USE_SQLITE = os.environ.get('USE_SQLITE', '').lower() in ('0', 'true', 'yes')
 
 if USE_SQLITE:
     DATABASES = {
