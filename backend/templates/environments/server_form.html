@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Serveur — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <h1>{{ action }} Serveur</h1>
+        <a href="{% url 'server_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+    </div>
+
+    <div class="glass-card">
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert error" style="margin-bottom: 1.5rem;">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label>Nom du serveur *</label>
+                {{ form.hostname }}
+                {% if form.hostname.errors %}<ul class="errorlist">{% for e in form.hostname.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Adresse IP</label>
+                {{ form.adresse_ip }}
+                {% if form.adresse_ip.errors %}<ul class="errorlist">{% for e in form.adresse_ip.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Système d’exploitation</label>
+                {{ form.systeme_exploitation }}
+                {% if form.systeme_exploitation.errors %}<ul class="errorlist">{% for e in form.systeme_exploitation.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}<ul class="errorlist">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

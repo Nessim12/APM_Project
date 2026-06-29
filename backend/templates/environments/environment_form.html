@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Environnement — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <h1>{{ action }} Environnement</h1>
+        <a href="{% url 'environment_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+    </div>
+
+    <div class="glass-card">
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert error" style="margin-bottom: 1.5rem;">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label>Nom *</label>
+                {{ form.nom }}
+                {% if form.nom.errors %}<ul class="errorlist">{% for e in form.nom.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>URL *</label>
+                {{ form.url }}
+                {% if form.url.errors %}<ul class="errorlist">{% for e in form.url.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Adresse IP *</label>
+                {{ form.adresse_ip }}
+                {% if form.adresse_ip.errors %}<ul class="errorlist">{% for e in form.adresse_ip.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label>OS *</label>
+                    {{ form.os }}
+                    {% if form.os.errors %}<ul class="errorlist">{% for e in form.os.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label>CPU *</label>
+                    {{ form.cpu }}
+                    {% if form.cpu.errors %}<ul class="errorlist">{% for e in form.cpu.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label>RAM *</label>
+                    {{ form.ram }}
+                    {% if form.ram.errors %}<ul class="errorlist">{% for e in form.ram.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Hébergeur *</label>
+                {{ form.hebergeur }}
+                {% if form.hebergeur.errors %}<ul class="errorlist">{% for e in form.hebergeur.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Type d’hébergement *</label>
+                {{ form.type_hebergement }}
+                {% if form.type_hebergement.errors %}<ul class="errorlist">{% for e in form.type_hebergement.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; align-items: center;">
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0;">
+                    {{ form.docker }}
+                    <label style="margin:0;">Docker</label>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0;">
+                    {{ form.kubernetes }}
+                    <label style="margin:0;">Kubernetes</label>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label>Application *</label>
+                    {{ form.application }}
+                    {% if form.application.errors %}<ul class="errorlist">{% for e in form.application.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+                        <span>Serveur</span>
+                        <a href="{% url 'server_create' %}" class="text-link" style="font-size: 0.85rem; color: #60a5fa;">Ajouter un serveur</a>
+                    </label>
+                    {{ form.serveur }}
+                    {% if form.serveur.errors %}<ul class="errorlist">{% for e in form.serveur.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
