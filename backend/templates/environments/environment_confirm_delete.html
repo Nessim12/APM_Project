@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer Environnement — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <h1>Supprimer l'environnement</h1>
+        <a href="{% url 'environment_detail' environment.pk %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+    </div>
+
+    <div class="glass-card">
+        <p>Voulez-vous vraiment supprimer l'environnement <strong>{{ environment.nom }}</strong> ? Cette action est irréversible.</p>
+
+        <form method="post" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            {% csrf_token %}
+            <button type="submit" class="btn danger">Supprimer</button>
+            <a href="{% url 'environment_detail' environment.pk %}" class="btn" style="background: transparent; border: 1px solid var(--border);">Annuler</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

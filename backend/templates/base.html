@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}APM Dashboard{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=3">
+    <style>
+        /* Critical layout — ensures top navbar even if CSS cache is stale */
+        body { flex-direction: column !important; }
+        .top-navbar {
+            display: flex !important;
+            align-items: center;
+            width: 100%;
+            height: 64px;
+            padding: 0 1.5rem;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-shrink: 0;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .navbar-nav {
+            display: flex !important;
+            list-style: none;
+            flex: 1;
+            gap: 0.25rem;
+            align-items: center;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar-nav li { list-style: none; }
+        .profile-panel {
+            position: fixed !important;
+            top: 0;
+            right: 0;
+            width: 340px;
+            max-width: 90vw;
+            height: 100vh;
+            transform: translateX(100%);
+            z-index: 200;
+            transition: transform 0.3s ease;
+        }
+        .profile-panel.open { transform: translateX(0); }
+        .profile-overlay {
+            position: fixed !important;
+            inset: 0;
+            visibility: hidden;
+            opacity: 0;
+            z-index: 150;
+            background: rgba(0, 0, 0, 0.55);
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .profile-overlay.open { visibility: visible; opacity: 1; }
+        .main-content { width: 100% !important; flex: 1; }
+    </style>
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <nav class="top-navbar">
+        <a href="{% if user.role == 'ADMIN' %}{% url 'dashboard' %}{% else %}{% url 'profile' %}{% endif %}" class="navbar-brand">APM Panel</a>
+        <ul class="navbar-nav">
+            <li><a href="{% url 'application_list' %}" class="nav-item">Gestion des applications</a></li>
+            <li><a href="{% url 'environment_list' %}" class="nav-item">Gestion des environnements</a></li>
+            <li><a href="#" class="nav-item">Gestion SSL</a></li>
+            <li><a href="{% url 'domaine_list' %}" class="nav-item">Gestion des Domaines</a></li>
+            <li><a href="#" class="nav-item">Gestion des Contrats</a></li>
+            <li><a href="#" class="nav-item">Documentation</a></li>
+        </ul>
+        <button type="button" class="profile-trigger" id="profileTrigger" aria-label="Ouvrir le profil">
+            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        </button>
+    </nav>
+
+    <div class="profile-overlay" id="profileOverlay"></div>
+    <aside class="profile-panel" id="profilePanel" aria-hidden="true">
+        <div class="profile-panel-header">
+            <h3>Mon Profil</h3>
+            <button type="button" class="profile-panel-close" id="profileClose" aria-label="Fermer">&times;</button>
+        </div>
+        <div class="profile-panel-body">
+            <div class="profile-panel-avatar">
+                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+            </div>
+            <h4 class="profile-panel-name">{{ user.first_name }} {{ user.last_name }}</h4>
+            <span class="badge {{ user.role|lower }} profile-panel-role">{{ user.get_role_display }}</span>
+
+            <dl class="profile-panel-info">
+                <div class="profile-info-row">
+                    <dt>Matricule</dt>
+                    <dd>{{ user.matricule|default:"—" }}</dd>
+                </div>
+                <div class="profile-info-row">
+                    <dt>Email</dt>
+                    <dd>{{ user.email|default:"—" }}</dd>
+                </div>
+                <div class="profile-info-row">
+                    <dt>Département</dt>
+                    <dd>{{ user.departement|default:"—" }}</dd>
+                </div>
+                <div class="profile-info-row">
+                    <dt>Téléphone</dt>
+                    <dd>{{ user.telephone|default:"—" }}</dd>
+                </div>
+                <div class="profile-info-row">
+                    <dt>Statut</dt>
+                    <dd>
+                        {% if user.is_active %}
+                            <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #6ee7b7;">Actif</span>
+                        {% else %}
+                            <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">Inactif</span>
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+
+            {% if user.role != 'ADMIN' %}
+            <a href="{% url 'profile' %}" class="btn profile-panel-edit">Modifier mon profil</a>
+            {% endif %}
+        </div>
+        <div class="profile-panel-footer">
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn danger" style="width: 100%; justify-content: center;">Déconnexion</button>
+            </form>
+        </div>
+    </aside>
+    {% endif %}
+
+    <main class="main-content">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert {{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% if user.is_authenticated %}
+    <script>
+        (function () {
+            var trigger = document.getElementById('profileTrigger');
+            var panel = document.getElementById('profilePanel');
+            var overlay = document.getElementById('profileOverlay');
+            var closeBtn = document.getElementById('profileClose');
+
+            function openPanel() {
+                panel.classList.add('open');
+                overlay.classList.add('open');
+                panel.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closePanel() {
+                panel.classList.remove('open');
+                overlay.classList.remove('open');
+                panel.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            trigger.addEventListener('click', openPanel);
+            closeBtn.addEventListener('click', closePanel);
+            overlay.addEventListener('click', closePanel);
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closePanel();
+            });
+        })();
+    </script>
+    {% endif %}
+</body>
+</html>
