@@ -66,9 +66,9 @@
         <a href="{% if user.role == 'ADMIN' %}{% url 'dashboard' %}{% else %}{% url 'profile' %}{% endif %}" class="navbar-brand">APM Panel</a>
         <ul class="navbar-nav">
             <li><a href="{% url 'application_list' %}" class="nav-item">Gestion des applications</a></li>
-            <li><a href="#" class="nav-item">Gestion des environnements</a></li>
+            <li><a href="{% url 'environment_list' %}" class="nav-item">Gestion des environnements</a></li>
             <li><a href="#" class="nav-item">Gestion SSL</a></li>
-            <li><a href="#" class="nav-item">Gestion des Domaines</a></li>
+            <li><a href="{% url 'domaine_list' %}" class="nav-item">Gestion des Domaines</a></li>
             <li><a href="#" class="nav-item">Gestion des Contrats</a></li>
             <li><a href="#" class="nav-item">Documentation</a></li>
         </ul>

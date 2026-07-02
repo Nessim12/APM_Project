@@ -2,13 +2,21 @@ import secrets
 import string
 import openpyxl
 
+from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import (
+    LoginView,
+    PasswordResetView,
+    PasswordResetDoneView,
+    PasswordResetConfirmView,
+    PasswordResetCompleteView,
+)
 from django.core.mail import send_mail
 from django.conf import settings
+from django.core.paginator import Paginator
 
 from .models import User
 from .forms import UserForm, ProfileForm, ExcelImportForm
@@ -63,13 +71,43 @@ class CustomLoginView(LoginView):
         return '/profile/'
 
 
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'accounts/password_reset_form.html'
+    email_template_name = 'accounts/password_reset_email.html'
+    subject_template_name = 'accounts/password_reset_subject.txt'
+    success_url = reverse_lazy('password_reset_done')
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'accounts/password_reset_done.html'
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'accounts/password_reset_confirm.html'
+    success_url = reverse_lazy('password_reset_complete')
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'accounts/password_reset_complete.html'
+
+
 # ─── Admin: User Management Dashboard ─────────────────────────────────────────
 
 @login_required
 @user_passes_test(is_admin)
 def dashboard(request):
-    users = User.objects.exclude(is_superuser=True).order_by('-date_joined')
-    return render(request, 'accounts/dashboard.html', {'users': users})
+    users_list = User.objects.exclude(is_superuser=True).order_by('-date_joined')
+    paginator = Paginator(users_list, 5)
+    page_number = request.GET.get('page')
+    users = paginator.get_page(page_number)
+    
+    params = request.GET.copy()
+    if 'page' in params:
+        del params['page']
+    url_params = params.urlencode()
+    url_params_str = f"&{url_params}" if url_params else ""
+
+    return render(request, 'accounts/dashboard.html', {'users': users, 'page_obj': users, 'url_params': url_params_str})
 
 
 @login_required

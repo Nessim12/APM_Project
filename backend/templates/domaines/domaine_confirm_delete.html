@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer Domaine — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="glass-card">
+        <h1>Supprimer le domaine</h1>
+        <p>Êtes-vous sûr de vouloir supprimer le domaine « {{ domaine.nom }} » ? Cette action est définitive.</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem;">
+                <button type="submit" class="btn danger">Confirmer la suppression</button>
+                <a href="{% url 'domaine_detail' domaine.pk %}" class="btn" style="background: transparent; border: 1px solid var(--border);">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

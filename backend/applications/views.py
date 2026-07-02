@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.core.paginator import Paginator
 
 from accounts.models import User
 from .forms import ApplicationFilterForm, ApplicationForm
@@ -64,12 +65,24 @@ def _filtered_queryset(request):
 @user_passes_test(is_admin)
 def application_list(request):
     """Liste du patrimoine applicatif avec moteur de filtrage multicritères."""
-    applications, filter_form = _filtered_queryset(request)
+    applications_list, filter_form = _filtered_queryset(request)
+    paginator = Paginator(applications_list, 5)
+    page_number = request.GET.get('page')
+    applications = paginator.get_page(page_number)
+    
+    params = request.GET.copy()
+    if 'page' in params:
+        del params['page']
+    url_params = params.urlencode()
+    url_params_str = f"&{url_params}" if url_params else ""
+
     return render(
         request,
         'applications/application_list.html',
         {
             'applications': applications,
+            'page_obj': applications,
+            'url_params': url_params_str,
             'filter_form': filter_form,
         },
     )
