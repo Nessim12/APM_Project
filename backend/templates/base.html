@@ -133,19 +133,20 @@
     {% endif %}
 
     <main class="main-content">
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                <div class="alert {{ message.tags }}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
         {% block content %}
         {% endblock %}
     </main>
+    
+    <div class="toast-container" id="toastContainer">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="toast {{ message.tags }}">
+                <div class="toast-content">{{ message|linebreaksbr }}</div>
+                <button type="button" class="toast-close" aria-label="Fermer" onclick="this.closest('.toast').remove()">&times;</button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
 
     {% if user.is_authenticated %}
     <script>
@@ -178,5 +179,18 @@
         })();
     </script>
     {% endif %}
+    <script>
+        // Auto-remove toasts after 6 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(20px)';
+                    setTimeout(() => toast.remove(), 400); // Wait for transition
+                }, 6000);
+            });
+        });
+    </script>
 </body>
 </html>

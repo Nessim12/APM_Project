@@ -264,9 +264,12 @@ def user_import_excel(request):
                     user.save()
                     send_welcome_email(user, password)
                     count += 1
-                for err in errors:
-                    messages.warning(request, err)
-                messages.success(request, f'{count} utilisateur(s) importé(s) ! Emails envoyés.')
+                if errors:
+                    error_msg = "Certains utilisateurs n'ont pas été importés (doublons) :\n" + "\n".join(errors)
+                    messages.warning(request, error_msg)
+                
+                if count > 0:
+                    messages.success(request, f'{count} utilisateur(s) importé(s) avec succès ! Emails envoyés.')
                 return redirect('dashboard')
             except Exception as e:
                 messages.error(request, f"Erreur lors de l'importation: {e}")
