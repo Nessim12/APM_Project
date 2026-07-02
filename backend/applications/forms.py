@@ -24,6 +24,7 @@ class ApplicationForm(forms.ModelForm):
             'date_fin_vie',
             'direction_metier',
             'nombre_utilisateurs',
+            'has_ssl',
             'responsable_metier',
             'responsable_technique',
             'chef_de_projet',
@@ -38,6 +39,7 @@ class ApplicationForm(forms.ModelForm):
             'date_fin_vie': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
             'direction_metier': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Direction métier'}),
             'nombre_utilisateurs': forms.NumberInput(attrs={'class': 'form-input', 'min': 0}),
+            'has_ssl': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'responsable_metier': forms.Select(attrs={'class': 'form-select'}),
             'responsable_technique': forms.Select(attrs={'class': 'form-select'}),
             'chef_de_projet': forms.Select(attrs={'class': 'form-select'}),
@@ -65,9 +67,10 @@ class ApplicationForm(forms.ModelForm):
         self.fields['statut'].choices = statut_choices
 
         for field_name in self.fields:
-            if field_name != 'date_fin_vie':
+            if field_name not in ('date_fin_vie', 'has_ssl'):
                 self.fields[field_name].required = True
         self.fields['date_fin_vie'].required = False
+        self.fields['has_ssl'].required = False
 
     def clean_nom(self):
         nom = self.cleaned_data.get('nom', '').strip()

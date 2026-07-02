@@ -48,6 +48,21 @@
                 <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Fin de vie</div>
                 <div>{{ application.date_fin_vie|date:"d/m/Y"|default:"—" }}</div>
             </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Certificat SSL</div>
+                <div>
+                    {% if application.has_ssl %}
+                        <span class="badge tech">Requis</span>
+                        {% if application.certificat_ssl %}
+                            <a href="{% url 'ssl_detail' application.certificat_ssl.pk %}" class="btn" style="padding: 0.3rem 0.7rem; font-size: 0.8rem; margin-left: 0.5rem;">Voir le certificat</a>
+                        {% else %}
+                            <a href="{% url 'ssl_create' %}?application={{ application.pk }}" class="btn" style="padding: 0.3rem 0.7rem; font-size: 0.8rem; margin-left: 0.5rem;">Configurer SSL</a>
+                        {% endif %}
+                    {% else %}
+                        <span style="color: var(--text-muted);">Non requis</span>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         <div style="margin-top: 1.5rem;">
             <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Description</div>

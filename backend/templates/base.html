@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}APM Dashboard{% endblock %}</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
     <style>
         /* Critical layout — ensures top navbar even if CSS cache is stale */
         body { flex-direction: column !important; }
         .top-navbar {
-            display: flex !important;
+            display: grid !important;
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
             width: 100%;
             height: 64px;
@@ -24,10 +25,12 @@
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
+        .navbar-brand { justify-self: start; }
         .navbar-nav {
             display: flex !important;
             list-style: none;
-            flex: 1;
+            justify-content: center;
+            justify-self: center;
             gap: 0.25rem;
             align-items: center;
             overflow-x: auto;
@@ -35,6 +38,7 @@
             padding: 0;
         }
         .navbar-nav li { list-style: none; }
+        .profile-trigger { justify-self: end; }
         .profile-panel {
             position: fixed !important;
             top: 0;
@@ -113,6 +117,43 @@
             border-radius: 6px;
         }
         .btn-dismiss:hover { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
+        .nav-alert-link {
+            justify-self: end;
+            margin-right: 0.75rem;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #e2e8f0;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .nav-alert-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .navbar-actions {
+            justify-self: end;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -122,14 +163,24 @@
         <ul class="navbar-nav">
             <li><a href="{% url 'application_list' %}" class="nav-item">Gestion des applications</a></li>
             <li><a href="{% url 'environment_list' %}" class="nav-item">Gestion des environnements</a></li>
-            <li><a href="#" class="nav-item">Gestion SSL</a></li>
+            <li><a href="{% url 'ssl_list' %}" class="nav-item">Gestion SSL</a></li>
             <li><a href="{% url 'domaine_list' %}" class="nav-item">Gestion des Domaines</a></li>
             <li><a href="#" class="nav-item">Gestion des Contrats</a></li>
             <li><a href="#" class="nav-item">Documentation</a></li>
         </ul>
-        <button type="button" class="profile-trigger" id="profileTrigger" aria-label="Ouvrir le profil">
-            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
-        </button>
+        <div class="navbar-actions">
+            {% if user.role == 'ADMIN' %}
+            <a href="{% url 'ssl_notifications' %}" class="nav-alert-link" aria-label="Alertes SSL">
+                &#128276;
+                {% if ssl_unread_notifications %}
+                <span class="nav-alert-badge">{{ ssl_unread_notifications }}</span>
+                {% endif %}
+            </a>
+            {% endif %}
+            <button type="button" class="profile-trigger" id="profileTrigger" aria-label="Ouvrir le profil">
+                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+            </button>
+        </div>
     </nav>
 
     <div class="profile-overlay" id="profileOverlay"></div>

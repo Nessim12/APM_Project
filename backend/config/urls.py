@@ -26,6 +26,7 @@ urlpatterns = [
     path('applications/', include('applications.urls')),
     path('environnements/', include('environments.urls')),
     path('domaines/', include('domaines.urls')),
+    path('ssl/', include('certificats_ssl.urls')),
     path('', RedirectView.as_view(url='dashboard/')),
 ]
 

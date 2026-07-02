@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ certificat.domaine }} — SSL — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <h1>{{ certificat.domaine }}</h1>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{% url 'ssl_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+            <a href="{% url 'ssl_update' certificat.pk %}" class="btn">Modifier</a>
+            <a href="{% url 'application_detail' certificat.application.pk %}" class="btn" style="background: transparent; border: 1px solid var(--border);">Voir l'application</a>
+        </div>
+    </div>
+
+    <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+            Attributs du certificat
+        </h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Application</div>
+                <div><a href="{% url 'application_detail' certificat.application.pk %}">{{ certificat.application.nom }}</a></div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Fournisseur SSL</div>
+                <div>{{ certificat.emetteur }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Type</div>
+                <div>{{ certificat.get_type_certificat_display }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Algorithme</div>
+                <div>{{ certificat.algorithme }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Date d'émission</div>
+                <div>{{ certificat.date_emission|date:"d/m/Y" }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Date d'expiration</div>
+                <div>{{ certificat.date_expiration|date:"d/m/Y" }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Jours restants</div>
+                <div>{{ certificat.jours_restants_label }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">État du certificat</div>
+                <div>{{ certificat.get_statut_calcule_display }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Renouvellement auto.</div>
+                <div>{{ certificat.auto_renouvellement|yesno:"Oui,Non" }}</div>
+            </div>
+        </div>
+        {% if certificat.notes %}
+        <div style="margin-top: 1.5rem;">
+            <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Notes</div>
+            <div style="line-height: 1.6;">{{ certificat.notes|linebreaksbr }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

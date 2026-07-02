@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'applications',
     'environments',
     'domaines',
+    'certificats_ssl',
 ]
 
 MIDDLEWARE = [
@@ -66,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'certificats_ssl.context_processors.ssl_notifications',
             ],
         },
     },
@@ -160,4 +162,13 @@ EMAIL_USE_TLS       = True
 EMAIL_HOST_USER     = 'nessimzitouni11@gmail.com'
 EMAIL_HOST_PASSWORD = 'dzzf oczr bwvu mhtr'
 DEFAULT_FROM_EMAIL  = 'APM Project <nessimzitouni11@gmail.com>'
+
+# ─── Alertes SSL ───────────────────────────────────────────────────────────────
+SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8000')
+SSL_ALERT_RAPPEL_JOURS = int(os.environ.get('SSL_ALERT_RAPPEL_JOURS', '7'))
+
+SMS_ENABLED = os.environ.get('SMS_ENABLED', '').strip().lower() in ('1', 'true', 'yes')
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
+TWILIO_FROM_NUMBER = os.environ.get('TWILIO_FROM_NUMBER', '')
 
