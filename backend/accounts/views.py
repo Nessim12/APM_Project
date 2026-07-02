@@ -17,9 +17,10 @@ from django.contrib.auth.views import (
 from django.core.mail import send_mail
 from django.conf import settings
 from django.core.paginator import Paginator
+from django.db.models import Q
 
 from .models import User
-from .forms import UserForm, ProfileForm, ExcelImportForm
+from .forms import UserForm, ProfileForm, ExcelImportForm, UserFilterForm
 
 
 # ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -96,7 +97,57 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
 @login_required
 @user_passes_test(is_admin)
 def dashboard(request):
-    users_list = User.objects.exclude(is_superuser=True).order_by('-date_joined')
+    users_list = User.objects.exclude(is_superuser=True)
+    
+    filter_form = UserFilterForm(request.GET)
+    if filter_form.is_valid():
+        data = filter_form.cleaned_data
+        
+        if data.get('q'):
+            q = data['q']
+            users_list = users_list.filter(
+                Q(matricule__icontains=q) |
+                Q(first_name__icontains=q) |
+                Q(last_name__icontains=q) |
+                Q(email__icontains=q) |
+                Q(departement__icontains=q)
+            )
+            
+        if data.get('role'):
+            users_list = users_list.filter(role=data['role'])
+            
+        if data.get('statut'):
+            # statut: '1' -> Actif, '0' -> Inactif
+            is_active = True if data['statut'] == '1' else False
+            users_list = users_list.filter(is_active=is_active)
+    
+    # Sort
+    sort_by = request.GET.get('sort', '-date_joined')
+    valid_sorts = ['matricule', '-matricule', 'first_name', '-first_name', 'email', '-email', 'departement', '-departement', 'role', '-role', 'is_active', '-is_active', 'date_joined', '-date_joined']
+    if sort_by in valid_sorts:
+        users_list = users_list.order_by(sort_by)
+    else:
+        users_list = users_list.order_by('-date_joined')
+
+    def get_sort_url(field):
+        p = request.GET.copy()
+        if 'page' in p:
+            del p['page']
+        if p.get('sort') == field:
+            p['sort'] = f"-{field}"
+        else:
+            p['sort'] = field
+        return f"?{p.urlencode()}"
+
+    sort_urls = {
+        'matricule': get_sort_url('matricule'),
+        'first_name': get_sort_url('first_name'),
+        'email': get_sort_url('email'),
+        'departement': get_sort_url('departement'),
+        'role': get_sort_url('role'),
+        'is_active': get_sort_url('is_active'),
+    }
+
     paginator = Paginator(users_list, 5)
     page_number = request.GET.get('page')
     users = paginator.get_page(page_number)
@@ -107,7 +158,14 @@ def dashboard(request):
     url_params = params.urlencode()
     url_params_str = f"&{url_params}" if url_params else ""
 
-    return render(request, 'accounts/dashboard.html', {'users': users, 'page_obj': users, 'url_params': url_params_str})
+    return render(request, 'accounts/dashboard.html', {
+        'users': users, 
+        'page_obj': users, 
+        'url_params': url_params_str,
+        'filter_form': filter_form,
+        'sort_by': sort_by,
+        'sort_urls': sort_urls
+    })
 
 
 @login_required

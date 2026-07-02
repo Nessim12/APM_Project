@@ -11,16 +11,72 @@
     </div>
 </div>
 
+<div class="glass-card" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+        Recherche & Filtres
+    </h3>
+    <form method="get" action="{% url 'dashboard' %}">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>{{ filter_form.q.label }}</label>
+                {{ filter_form.q }}
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>{{ filter_form.role.label }}</label>
+                {{ filter_form.role }}
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>{{ filter_form.statut.label }}</label>
+                {{ filter_form.statut }}
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn" style="flex: 1; justify-content: center;">Filtrer</button>
+                <a href="{% url 'dashboard' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">Réinitialiser</a>
+            </div>
+        </div>
+    </form>
+</div>
+
 <div class="glass-card">
     <table>
         <thead>
             <tr>
-                <th>Matricule</th>
-                <th>Nom Complet</th>
-                <th>Email</th>
-                <th>Département</th>
-                <th>Rôle</th>
-                <th>Statut</th>
+                <th>
+                    <a href="{{ sort_urls.matricule }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                        Matricule
+                        {% if sort_by == 'matricule' %}&uarr;{% elif sort_by == '-matricule' %}&darr;{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ sort_urls.first_name }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                        Nom Complet
+                        {% if sort_by == 'first_name' %}&uarr;{% elif sort_by == '-first_name' %}&darr;{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ sort_urls.email }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                        Email
+                        {% if sort_by == 'email' %}&uarr;{% elif sort_by == '-email' %}&darr;{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ sort_urls.departement }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                        Département
+                        {% if sort_by == 'departement' %}&uarr;{% elif sort_by == '-departement' %}&darr;{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ sort_urls.role }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                        Rôle
+                        {% if sort_by == 'role' %}&uarr;{% elif sort_by == '-role' %}&darr;{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ sort_urls.is_active }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                        Statut
+                        {% if sort_by == 'is_active' %}&uarr;{% elif sort_by == '-is_active' %}&darr;{% endif %}
+                    </a>
+                </th>
                 <th>Actions</th>
             </tr>
         </thead>
