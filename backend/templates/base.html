@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}APM Dashboard{% endblock %}</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4">
     <style>
         /* Critical layout — ensures top navbar even if CSS cache is stale */
         body { flex-direction: column !important; }
@@ -58,6 +58,61 @@
         }
         .profile-overlay.open { visibility: visible; opacity: 1; }
         .main-content { width: 100% !important; flex: 1; }
+        /* Critical notification styles — toast en haut à droite */
+        .floating-notification-container {
+            position: fixed !important;
+            top: 80px;
+            right: 24px;
+            display: flex !important;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10000;
+            width: 380px;
+            max-width: calc(100vw - 48px);
+            pointer-events: none;
+        }
+        .floating-notification {
+            pointer-events: auto;
+            background-color: #121212;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+            color: #e5e5e5;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            display: flex !important;
+            flex-direction: column;
+            gap: 10px;
+            animation: notifPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transition: opacity 0.4s, transform 0.4s;
+        }
+        @keyframes notifPopIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .fn-title { font-weight: 600; font-size: 0.95rem; color: #ffffff; }
+        .floating-notification.success .fn-title { color: #34d399; }
+        .floating-notification.error .fn-title { color: #f87171; }
+        .floating-notification.warning .fn-title { color: #fbbf24; }
+        .floating-notification.info .fn-title { color: #93c5fd; }
+        .fn-body {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #a3a3a3;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .fn-actions { display: flex; justify-content: flex-end; margin-top: 4px; }
+        .btn-dismiss {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #a3a3a3;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+        .btn-dismiss:hover { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
     </style>
 </head>
 <body>
@@ -137,12 +192,23 @@
         {% endblock %}
     </main>
     
-    <div class="toast-container" id="toastContainer">
+    <div class="floating-notification-container" id="floatingNotificationContainer">
         {% if messages %}
             {% for message in messages %}
-            <div class="toast {{ message.tags }}">
-                <div class="toast-content">{{ message|linebreaksbr }}</div>
-                <button type="button" class="toast-close" aria-label="Fermer" onclick="this.closest('.toast').remove()">&times;</button>
+            <div class="floating-notification {{ message.level_tag }}">
+                <div class="fn-header">
+                    <span class="fn-title">
+                        {% if message.level_tag == 'success' %}Succès
+                        {% elif message.level_tag == 'error' %}Erreur
+                        {% elif message.level_tag == 'warning' %}Attention
+                        {% elif message.level_tag == 'info' %}Information
+                        {% else %}Notification{% endif %}
+                    </span>
+                </div>
+                <div class="fn-body">{{ message|linebreaksbr }}</div>
+                <div class="fn-actions">
+                    <button type="button" class="btn-dismiss" onclick="this.closest('.floating-notification').remove()">Fermer</button>
+                </div>
             </div>
             {% endfor %}
         {% endif %}
@@ -180,15 +246,16 @@
     </script>
     {% endif %}
     <script>
-        // Auto-remove toasts after 6 seconds
+        // Auto-remove notifications (plus long pour les avertissements/doublons)
         document.addEventListener('DOMContentLoaded', () => {
-            const toasts = document.querySelectorAll('.toast');
-            toasts.forEach(toast => {
+            const notifications = document.querySelectorAll('.floating-notification');
+            notifications.forEach(notif => {
+                const delay = notif.classList.contains('warning') || notif.classList.contains('error') ? 15000 : 8000;
                 setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateY(20px)';
-                    setTimeout(() => toast.remove(), 400); // Wait for transition
-                }, 6000);
+                    notif.style.opacity = '0';
+                    notif.style.transform = 'translateY(-20px) scale(0.95)';
+                    setTimeout(() => notif.remove(), 400);
+                }, delay);
             });
         });
     </script>

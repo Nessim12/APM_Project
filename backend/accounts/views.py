@@ -264,12 +264,18 @@ def user_import_excel(request):
                     user.save()
                     send_welcome_email(user, password)
                     count += 1
-                if errors:
-                    error_msg = "Certains utilisateurs n'ont pas été importés (doublons) :\n" + "\n".join(errors)
-                    messages.warning(request, error_msg)
-                
                 if count > 0:
                     messages.success(request, f'{count} utilisateur(s) importé(s) avec succès ! Emails envoyés.')
+
+                if errors:
+                    if count == 0:
+                        error_msg = "Import annulé — tous les utilisateurs existent déjà :\n" + "\n".join(errors)
+                    else:
+                        error_msg = "Certains utilisateurs n'ont pas été importés (doublons) :\n" + "\n".join(errors)
+                    messages.warning(request, error_msg)
+                elif count == 0:
+                    messages.info(request, 'Aucun utilisateur à importer dans le fichier.')
+
                 return redirect('dashboard')
             except Exception as e:
                 messages.error(request, f"Erreur lors de l'importation: {e}")

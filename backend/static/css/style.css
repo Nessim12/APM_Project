@@ -374,66 +374,90 @@ tr:hover td {
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-/* Toasts */
-.toast-container {
+/* Floating Notifications (IDE style) */
+.floating-notification-container {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    top: 80px; /* Sur le tableau, just below navbar */
+    right: 24px;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    z-index: 9999;
-    max-width: 450px;
-    width: calc(100% - 4rem);
+    gap: 12px;
+    z-index: 10000;
+    width: 380px;
+    max-width: calc(100vw - 48px);
 }
-.toast {
-    background: var(--bg-card);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--border);
-    border-left-width: 5px;
-    padding: 1.25rem 1.5rem;
-    border-radius: 0.75rem;
-    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+
+.floating-notification {
+    background-color: #121212; /* Very dark grey matching IDE */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    color: #e5e5e5;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    flex-direction: column;
+    gap: 10px;
+    animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     transition: opacity 0.4s, transform 0.4s;
 }
-@keyframes slideInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.toast.success { border-left-color: var(--success); }
-.toast.error { border-left-color: var(--danger); }
-.toast.warning { border-left-color: #f59e0b; }
-.toast.info { border-left-color: var(--accent); }
 
-.toast-content {
-    flex: 1;
-    font-size: 0.9rem;
+@keyframes popIn {
+    from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fn-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fn-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #ffffff;
+}
+
+.floating-notification.success .fn-title { color: #34d399; }
+.floating-notification.error .fn-title { color: #f87171; }
+.floating-notification.warning .fn-title { color: #fbbf24; }
+.floating-notification.info .fn-title { color: #93c5fd; }
+
+.fn-body {
+    font-size: 0.85rem;
     line-height: 1.5;
-    color: var(--text-main);
-    max-height: 200px;
+    color: #a3a3a3;
+    max-height: 250px;
     overflow-y: auto;
     scrollbar-width: thin;
-    padding-right: 0.5rem;
+    padding-right: 4px;
 }
-.toast-content::-webkit-scrollbar { width: 4px; }
-.toast-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+.fn-body::-webkit-scrollbar { width: 4px; }
+.fn-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
 
-.toast-close {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    font-size: 1.5rem;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0;
-    transition: color 0.2s;
+.fn-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
 }
-.toast-close:hover { color: white; }
+
+.btn-dismiss {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #a3a3a3;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
+}
+
+.btn-dismiss:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
 
 /* Login box */
 .login-container {
