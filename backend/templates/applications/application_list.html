@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestion des Applications — APM{% endblock %}
+
+{% block content %}
+<div class="header-row">
+    <h1>Gestion des Applications</h1>
+    <a href="{% url 'application_create' %}" class="btn">Nouvelle Application</a>
+</div>
+
+<div class="glass-card" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+        Filtres de recherche
+    </h3>
+    <form method="get" action="{% url 'application_list' %}">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>{{ filter_form.nom.label }}</label>
+                {{ filter_form.nom }}
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>{{ filter_form.criticite.label }}</label>
+                {{ filter_form.criticite }}
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>{{ filter_form.statut.label }}</label>
+                {{ filter_form.statut }}
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>{{ filter_form.direction_metier.label }}</label>
+                {{ filter_form.direction_metier }}
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>{{ filter_form.responsable.label }}</label>
+                {{ filter_form.responsable }}
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn" style="flex: 1; justify-content: center;">Filtrer</button>
+                <a href="{% url 'application_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">Réinitialiser</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="glass-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Criticité</th>
+                <th>Statut</th>
+                <th>Direction métier</th>
+                <th>Mise en prod.</th>
+                <th>Utilisateurs</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>
+                    <a href="{% url 'application_detail' app.pk %}" style="color: #93c5fd; text-decoration: none; font-weight: 500;">
+                        {{ app.nom }}
+                    </a>
+                </td>
+                <td>
+                    {% if app.criticite == 'CRITIQUE' %}
+                        <span class="badge admin">{{ app.get_criticite_display }}</span>
+                    {% elif app.criticite == 'MOYENNE' %}
+                        <span class="badge tech">{{ app.get_criticite_display }}</span>
+                    {% else %}
+                        <span class="badge membre">{{ app.get_criticite_display }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if app.statut == 'ACTIF' %}
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #6ee7b7;">{{ app.get_statut_display }}</span>
+                    {% elif app.statut == 'INACTIF' %}
+                        <span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #cbd5e1;">{{ app.get_statut_display }}</span>
+                    {% else %}
+                        <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">{{ app.get_statut_display }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ app.direction_metier }}</td>
+                <td>{{ app.date_mise_en_production|date:"d/m/Y" }}</td>
+                <td>{{ app.nombre_utilisateurs }}</td>
+                <td style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="{% url 'application_detail' app.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Voir</a>
+                    <a href="{% url 'application_update' app.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Modifier</a>
+                    {% if app.statut != 'ARCHIVE' %}
+                    <form action="{% url 'application_archive' app.pk %}" method="post" style="display:inline;"
+                          onsubmit="return confirm('Archiver cette application ?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn danger" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Archiver</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted);">
+                    Aucune application trouvée.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    {% include 'pagination.html' %}
+</div>
+{% endblock %}

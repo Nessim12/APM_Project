@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestion des Serveurs — APM{% endblock %}
+
+{% block content %}
+<div class="header-row">
+    <h1>Gestion des Serveurs</h1>
+    <a href="{% url 'server_create' %}" class="btn">Nouveau Serveur</a>
+</div>
+
+<div class="glass-card" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+        Recherche
+    </h3>
+    <form method="get" action="{% url 'server_list' %}">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Nom</label>
+                <input type="search" name="q" value="{{ query }}" class="form-input" placeholder="Rechercher par nom…">
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn" style="flex: 1; justify-content: center;">Rechercher</button>
+                <a href="{% url 'server_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">Réinitialiser</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="glass-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>IP</th>
+                <th>OS</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for server in servers %}
+            <tr>
+                <td>{{ server.hostname }}</td>
+                <td>{{ server.adresse_ip|default:'—' }}</td>
+                <td>{{ server.systeme_exploitation|default:'—' }}</td>
+                <td>{{ server.description|default:'—' }}</td>
+                <td style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="{% url 'server_update' server.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Modifier</a>
+                    <a href="{% url 'server_delete' server.pk %}" class="btn danger" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Supprimer</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted);">Aucun serveur trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

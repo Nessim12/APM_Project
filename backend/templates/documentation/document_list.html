@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Documentation — APM{% endblock %}
+
+{% block content %}
+<div class="header-row">
+    <h1>Documentation</h1>
+    <a href="{% url 'document_create' %}" class="btn">Nouveau document</a>
+</div>
+
+<div class="glass-card" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+        Filtres
+    </h3>
+    <form method="get" action="{% url 'document_list' %}" id="documentFilterForm" data-auto-filter="true">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Recherche</label>
+                {{ filter_form.q }}
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Catégorie</label>
+                {{ filter_form.categorie }}
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Module</label>
+                {{ filter_form.type_gestion }}
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Type de fichier</label>
+                {{ filter_form.type_fichier }}
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <a href="{% url 'document_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border); justify-content: center;">Réinitialiser</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% if documents %}
+<div class="doc-grid">
+    {% for doc in documents %}
+    <article class="doc-card glass-card">
+        <div class="doc-card-icon">{{ doc.icone_fichier }}</div>
+        <div class="doc-card-body">
+            <h3 class="doc-card-title">
+                <a href="{% url 'document_detail' doc.pk %}">{{ doc.nom }}</a>
+            </h3>
+            <div class="doc-card-meta">
+                <span class="badge">{{ doc.get_categorie_display }}</span>
+                <span class="badge tech">{{ doc.get_type_gestion_display }}</span>
+                <span class="doc-type-label">{{ doc.type_fichier|upper }}</span>
+            </div>
+            {% if doc.description %}
+            <p class="doc-card-desc">{{ doc.description|truncatewords:20 }}</p>
+            {% endif %}
+            <div class="doc-card-footer">
+                <span class="doc-card-date">{{ doc.date_upload|date:"d/m/Y H:i" }}</span>
+                <span class="doc-card-size">{{ doc.taille_lisible }}</span>
+            </div>
+            {% if doc.get_related_label != "—" %}
+            <div class="doc-card-related">
+                Lié à :
+                {% if doc.get_related_url %}
+                <a href="{{ doc.get_related_url }}">{{ doc.get_related_label }}</a>
+                {% else %}
+                {{ doc.get_related_label }}
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="doc-card-actions">
+            <a href="{% url 'document_download' doc.pk %}" class="btn doc-download-btn" title="Télécharger">
+                ⬇ Télécharger
+            </a>
+            <a href="{% url 'document_detail' doc.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: transparent; border: 1px solid var(--border);">
+                Voir
+            </a>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+
+<div style="margin-top: 2rem;">
+    {% include 'pagination.html' %}
+</div>
+{% else %}
+<div class="glass-card" style="text-align: center; padding: 3rem;">
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Aucun document trouvé.</p>
+    <a href="{% url 'document_create' %}" class="btn">Ajouter le premier document</a>
+</div>
+{% endif %}
+
+<script>
+(function () {
+    const form = document.getElementById('documentFilterForm');
+    if (!form) return;
+
+    const textFields = form.querySelectorAll('input[type="text"]');
+    const selectFields = form.querySelectorAll('select');
+    let typingTimer = null;
+
+    function submitForm() {
+        if (typingTimer) {
+            clearTimeout(typingTimer);
+            typingTimer = null;
+        }
+        form.submit();
+    }
+
+    textFields.forEach((field) => {
+        field.addEventListener('input', function () {
+            if (typingTimer) {
+                clearTimeout(typingTimer);
+            }
+            typingTimer = setTimeout(submitForm, 450);
+        });
+
+        field.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                submitForm();
+            }
+        });
+    });
+
+    selectFields.forEach((field) => {
+        field.addEventListener('change', submitForm);
+    });
+})();
+</script>
+{% endblock %}

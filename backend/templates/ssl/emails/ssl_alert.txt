@@ -1,0 +1,23 @@
+Bonjour,
+
+Une alerte SSL a été déclenchée sur la plateforme APM Project.
+
+Niveau d'alerte : {{ niveau_label }}
+
+Application      : {{ certificat.application.nom }}
+Domaine          : {{ certificat.domaine }}
+Fournisseur SSL  : {{ certificat.emetteur }}
+Date d'expiration: {{ certificat.date_expiration|date:"d/m/Y" }}
+Jours restants   : {{ jours_restants_label }}
+Renouvellement   : {{ renouvellement_label }}
+
+{% if auto_renouvellement %}
+Ce certificat est configuré avec renouvellement automatique. Vérifiez tout de même que le renouvellement s'est bien effectué.
+{% else %}
+Ce certificat nécessite une action manuelle de renouvellement.
+{% endif %}
+
+Consulter le certificat : {{ site_url }}/ssl/{{ certificat.pk }}/
+
+Cordialement,
+L'équipe APM Project

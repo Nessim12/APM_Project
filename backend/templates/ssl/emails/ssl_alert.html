@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Alerte SSL — APM Project</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #1e293b; background: #f8fafc; padding: 24px;">
+    <div style="max-width: 620px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
+        <h2 style="margin-top: 0; color: #0f172a;">Alerte SSL — APM Project</h2>
+        <p style="font-size: 16px; font-weight: bold; color: {% if niveau == 'EXPIRE' %}#dc2626{% elif niveau == 'J30' %}#d97706{% else %}#2563eb{% endif %};">
+            {{ niveau_label }}
+        </p>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr><td style="padding: 8px 0; color: #64748b;">Application</td><td style="padding: 8px 0;"><strong>{{ certificat.application.nom }}</strong></td></tr>
+            <tr><td style="padding: 8px 0; color: #64748b;">Domaine</td><td style="padding: 8px 0;">{{ certificat.domaine }}</td></tr>
+            <tr><td style="padding: 8px 0; color: #64748b;">Fournisseur SSL</td><td style="padding: 8px 0;">{{ certificat.emetteur }}</td></tr>
+            <tr><td style="padding: 8px 0; color: #64748b;">Date d'expiration</td><td style="padding: 8px 0;">{{ certificat.date_expiration|date:"d/m/Y" }}</td></tr>
+            <tr><td style="padding: 8px 0; color: #64748b;">Jours restants</td><td style="padding: 8px 0;">{{ jours_restants_label }}</td></tr>
+            <tr><td style="padding: 8px 0; color: #64748b;">Renouvellement</td><td style="padding: 8px 0;">{{ renouvellement_label }}</td></tr>
+        </table>
+
+        {% if auto_renouvellement %}
+        <p style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px 16px; border-radius: 6px;">
+            Renouvellement automatique activé — vérifiez que le renouvellement s'est bien effectué.
+        </p>
+        {% else %}
+        <p style="background: #fff7ed; border-left: 4px solid #f97316; padding: 12px 16px; border-radius: 6px;">
+            Renouvellement manuel requis — une action est nécessaire avant l'expiration.
+        </p>
+        {% endif %}
+
+        <p style="margin-top: 24px;">
+            <a href="{{ site_url }}/ssl/{{ certificat.pk }}/" style="display: inline-block; background: #2563eb; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 8px;">
+                Voir le certificat
+            </a>
+        </p>
+    </div>
+</body>
+</html>
