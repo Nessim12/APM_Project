@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer Document — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <h1>Supprimer le document</h1>
+        <a href="{% url 'document_detail' document.pk %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+    </div>
+
+    <div class="glass-card">
+        <p style="margin-bottom: 1.5rem; line-height: 1.6;">
+            Êtes-vous sûr de vouloir supprimer le document
+            <strong>{{ document.nom }}</strong> ({{ document.type_fichier|upper }}) ?
+            Cette action est irréversible.
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 0.75rem;">
+                <button type="submit" class="btn danger">Confirmer la suppression</button>
+                <a href="{% url 'document_detail' document.pk %}" class="btn" style="background: transparent; border: 1px solid var(--border);">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

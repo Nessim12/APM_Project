@@ -1,0 +1,21 @@
+{% if page_obj.has_other_pages %}
+<div style="display: flex; justify-content: center; margin-top: 1.5rem; gap: 0.5rem; flex-wrap: wrap;">
+    {% if page_obj.has_previous %}
+        <a href="?page=1{{ url_params }}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: transparent; border: 1px solid var(--border);">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}{{ url_params }}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: transparent; border: 1px solid var(--border);">&lsaquo;</a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+            <span class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: var(--primary); color: white; border: 1px solid var(--primary); cursor: default;">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}{{ url_params }}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: transparent; border: 1px solid var(--border);">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{{ url_params }}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: transparent; border: 1px solid var(--border);">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{{ url_params }}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: transparent; border: 1px solid var(--border);">&raquo;</a>
+    {% endif %}
+</div>
+{% endif %}

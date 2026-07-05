@@ -2,16 +2,25 @@ import secrets
 import string
 import openpyxl
 
+from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import (
+    LoginView,
+    PasswordResetView,
+    PasswordResetDoneView,
+    PasswordResetConfirmView,
+    PasswordResetCompleteView,
+)
 from django.core.mail import send_mail
 from django.conf import settings
+from django.core.paginator import Paginator
+from django.db.models import Q
 
 from .models import User
-from .forms import UserForm, ProfileForm, ExcelImportForm
+from .forms import UserForm, ProfileForm, ExcelImportForm, UserFilterForm
 
 
 # ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -56,6 +65,15 @@ class CustomLoginView(LoginView):
     template_name = 'accounts/login.html'
     redirect_authenticated_user = True
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        reason = getattr(self.request, 'auth_failure_reason', None)
+        if reason == 'inactive':
+            context['auth_error_message'] = "Votre compte n'est pas activé. Veuillez contacter l'administrateur."
+        elif self.request.method == 'POST' and self.request.user.is_anonymous:
+            context['auth_error_message'] = "Identifiant ou mot de passe incorrect."
+        return context
+
     def get_success_url(self):
         user = self.request.user
         if user.role == User.RoleChoices.ADMIN:
@@ -63,13 +81,100 @@ class CustomLoginView(LoginView):
         return '/profile/'
 
 
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'accounts/password_reset_form.html'
+    email_template_name = 'accounts/password_reset_email.html'
+    subject_template_name = 'accounts/password_reset_subject.txt'
+    success_url = reverse_lazy('password_reset_done')
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'accounts/password_reset_done.html'
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'accounts/password_reset_confirm.html'
+    success_url = reverse_lazy('password_reset_complete')
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'accounts/password_reset_complete.html'
+
+
 # ─── Admin: User Management Dashboard ─────────────────────────────────────────
 
 @login_required
 @user_passes_test(is_admin)
 def dashboard(request):
-    users = User.objects.exclude(is_superuser=True).order_by('-date_joined')
-    return render(request, 'accounts/dashboard.html', {'users': users})
+    users_list = User.objects.exclude(is_superuser=True)
+    
+    filter_form = UserFilterForm(request.GET)
+    if filter_form.is_valid():
+        data = filter_form.cleaned_data
+        
+        if data.get('q'):
+            q = data['q']
+            users_list = users_list.filter(
+                Q(matricule__icontains=q) |
+                Q(first_name__icontains=q) |
+                Q(last_name__icontains=q) |
+                Q(email__icontains=q) |
+                Q(departement__icontains=q)
+            )
+            
+        if data.get('role'):
+            users_list = users_list.filter(role=data['role'])
+            
+        if data.get('statut'):
+            # statut: '1' -> Actif, '0' -> Inactif
+            is_active = True if data['statut'] == '1' else False
+            users_list = users_list.filter(is_active=is_active)
+    
+    # Sort
+    sort_by = request.GET.get('sort', '-date_joined')
+    valid_sorts = ['matricule', '-matricule', 'first_name', '-first_name', 'email', '-email', 'departement', '-departement', 'role', '-role', 'is_active', '-is_active', 'date_joined', '-date_joined']
+    if sort_by in valid_sorts:
+        users_list = users_list.order_by(sort_by)
+    else:
+        users_list = users_list.order_by('-date_joined')
+
+    def get_sort_url(field):
+        p = request.GET.copy()
+        if 'page' in p:
+            del p['page']
+        if p.get('sort') == field:
+            p['sort'] = f"-{field}"
+        else:
+            p['sort'] = field
+        return f"?{p.urlencode()}"
+
+    sort_urls = {
+        'matricule': get_sort_url('matricule'),
+        'first_name': get_sort_url('first_name'),
+        'email': get_sort_url('email'),
+        'departement': get_sort_url('departement'),
+        'role': get_sort_url('role'),
+        'is_active': get_sort_url('is_active'),
+    }
+
+    paginator = Paginator(users_list, 5)
+    page_number = request.GET.get('page')
+    users = paginator.get_page(page_number)
+    
+    params = request.GET.copy()
+    if 'page' in params:
+        del params['page']
+    url_params = params.urlencode()
+    url_params_str = f"&{url_params}" if url_params else ""
+
+    return render(request, 'accounts/dashboard.html', {
+        'users': users, 
+        'page_obj': users, 
+        'url_params': url_params_str,
+        'filter_form': filter_form,
+        'sort_by': sort_by,
+        'sort_urls': sort_urls
+    })
 
 
 @login_required
@@ -168,9 +273,18 @@ def user_import_excel(request):
                     user.save()
                     send_welcome_email(user, password)
                     count += 1
-                for err in errors:
-                    messages.warning(request, err)
-                messages.success(request, f'{count} utilisateur(s) importé(s) ! Emails envoyés.')
+                if count > 0:
+                    messages.success(request, f'{count} utilisateur(s) importé(s) avec succès ! Emails envoyés.')
+
+                if errors:
+                    if count == 0:
+                        error_msg = "Import annulé — tous les utilisateurs existent déjà :\n" + "\n".join(errors)
+                    else:
+                        error_msg = "Certains utilisateurs n'ont pas été importés (doublons) :\n" + "\n".join(errors)
+                    messages.warning(request, error_msg)
+                elif count == 0:
+                    messages.info(request, 'Aucun utilisateur à importer dans le fichier.')
+
                 return redirect('dashboard')
             except Exception as e:
                 messages.error(request, f"Erreur lors de l'importation: {e}")

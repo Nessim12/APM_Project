@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Fournisseurs — APM{% endblock %}
+{% block content %}
+
+<div class="header-row">
+  <div>
+    <h1>Fournisseurs</h1>
+    <p style="color:var(--text-muted);margin:0.25rem 0 0">Partenaires et prestataires liés aux contrats.</p>
+  </div>
+  <div style="display:flex;gap:0.75rem;align-items:center">
+    <a href="{% url 'contrats:fournisseur_create' %}" class="btn">+ Nouveau fournisseur</a>
+    <a href="{% url 'contrats:contrat_dashboard' %}"
+       class="btn" style="background:transparent;border:1px solid var(--border)">← Contrats</a>
+  </div>
+</div>
+
+<!-- Recherche -->
+<div class="glass-card" style="margin-bottom:1.5rem">
+  <form method="get" action="{% url 'contrats:fournisseur_list' %}">
+    <div style="display:flex;gap:1rem;align-items:flex-end">
+      <div class="form-group" style="margin-bottom:0;flex:1">
+        <label style="font-size:0.85rem;color:var(--text-muted)">Recherche</label>
+        <input type="text" name="q" value="{{ query }}" class="form-input"
+               placeholder="Nom, email, téléphone, responsable…">
+      </div>
+      <button type="submit" class="btn">Rechercher</button>
+      {% if query %}
+      <a href="{% url 'contrats:fournisseur_list' %}"
+         class="btn" style="background:transparent;border:1px solid var(--border)">
+        Réinitialiser
+      </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Table -->
+<div class="glass-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Responsable</th>
+        <th>Email</th>
+        <th>Téléphone</th>
+        <th>Site web</th>
+        <th style="text-align:center">Contrats</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in fournisseurs %}
+      <tr>
+        <td style="font-weight:600">{{ f.nom }}</td>
+        <td>{{ f.responsable|default:'—' }}</td>
+        <td>
+          {% if f.email %}
+          <a href="mailto:{{ f.email }}" style="color:#93c5fd;text-decoration:none">{{ f.email }}</a>
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ f.telephone|default:'—' }}</td>
+        <td>
+          {% if f.site_web %}
+          <a href="{{ f.site_web }}" target="_blank" rel="noopener"
+             style="color:#93c5fd;text-decoration:none">🔗 Visiter</a>
+          {% else %}—{% endif %}
+        </td>
+        <td style="text-align:center">
+          <span class="badge" style="background:rgba(59,130,246,0.12);color:#93c5fd">
+            {{ f.nb_contrats }}
+          </span>
+        </td>
+        <td style="display:flex;gap:0.4rem;flex-wrap:wrap">
+          <a href="{% url 'contrats:fournisseur_update' f.pk %}"
+             class="btn" style="padding:0.3rem 0.65rem;font-size:0.82rem">Modifier</a>
+          <form action="{% url 'contrats:fournisseur_delete' f.pk %}" method="post"
+                style="display:inline"
+                onsubmit="return confirm('Supprimer le fournisseur {{ f.nom }} ?');">
+            {% csrf_token %}
+            <button type="submit" class="btn danger"
+                    style="padding:0.3rem 0.65rem;font-size:0.82rem"
+                    {% if f.nb_contrats > 0 %}disabled title="Ce fournisseur a {{ f.nb_contrats }} contrat(s) lié(s)"{% endif %}>
+              Supprimer
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">
+          Aucun fournisseur trouvé.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% include 'pagination.html' %}
+</div>
+
+{% endblock %}

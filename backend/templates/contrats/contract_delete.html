@@ -1,0 +1,41 @@
+{% extends 'base.html' %} {% block title %}Supprimer Contrat — APM{% endblock %}
+{% block content %}
+<div class="page-centered">
+  <div class="header-row">
+    <h1>Supprimer le contrat</h1>
+    <a
+      href="{% url 'contrats:contract_detail' contract.pk %}"
+      class="btn"
+      style="background: transparent; border: 1px solid var(--border)"
+      >← Retour</a
+    >
+  </div>
+
+  <div class="glass-card">
+    <p>
+      Confirmez-vous la suppression du contrat
+      <strong>{{ contract.numero_contrat }}</strong> ?
+    </p>
+    <form method="post">
+      {% csrf_token %}
+      <div
+        style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem"
+      >
+        <button
+          type="submit"
+          class="btn danger"
+          style="flex: 1; justify-content: center"
+        >
+          Oui, supprimer
+        </button>
+        <a
+          href="{% url 'contrats:contract_detail' contract.pk %}"
+          class="btn"
+          style="background: transparent; border: 1px solid var(--border)"
+          >Annuler</a
+        >
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

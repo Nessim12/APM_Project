@@ -111,3 +111,25 @@ class ExcelImportForm(forms.Form):
         label='Fichier Excel',
         widget=forms.FileInput(attrs={'class': 'file-input', 'accept': '.xlsx, .xls'})
     )
+
+
+# ─── Filter Form ───────────────────────────────────────────────────────────────
+
+class UserFilterForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        label='Recherche',
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Matricule, nom, email…'}),
+    )
+    role = forms.ChoiceField(
+        required=False,
+        label='Rôle',
+        choices=[('', '— Tous —')] + list(User.RoleChoices.choices),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+    statut = forms.ChoiceField(
+        required=False,
+        label='Statut',
+        choices=[('', '— Tous —'), ('1', 'Actif'), ('0', 'Inactif')],
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )

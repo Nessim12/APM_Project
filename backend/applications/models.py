@@ -82,6 +82,11 @@ class Application(models.Model):
     )
     direction_metier = models.CharField(max_length=255, verbose_name=_('Direction métier'))
     nombre_utilisateurs = models.PositiveIntegerField(verbose_name=_("Nombre d'utilisateurs"))
+    has_ssl = models.BooleanField(
+        default=False,
+        verbose_name=_('Certificat SSL requis'),
+        help_text=_("Indique si l'application nécessite un certificat SSL."),
+    )
 
     # Gouvernance humaine — 4 rôles pivots obligatoires
     responsable_metier = models.ForeignKey(

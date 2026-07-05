@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}Gestion des Contrats — APM{% endblock %}
+{% block content %}
+
+<div class="header-row">
+  <div>
+    <h1>Gestion des Contrats</h1>
+    <p style="color:var(--text-muted);margin:0.25rem 0 0">Vue d'ensemble de tous les contrats du patrimoine applicatif.</p>
+  </div>
+  <a href="{% url 'contrats:contract_create' %}" class="btn">+ Nouveau contrat</a>
+</div>
+
+<!-- ── Barre de stats globales ───────────────────────────────────────── -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem">
+
+  <div class="glass-card" style="text-align:center;padding:1.2rem">
+    <div style="font-size:1.8rem;font-weight:700;color:#f8fafc">{{ total_contrats }}</div>
+    <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.25rem">Contrats total</div>
+  </div>
+
+  <div class="glass-card" style="text-align:center;padding:1.2rem">
+    <div style="font-size:1.8rem;font-weight:700;color:#34d399">{{ statut_counts.ACTIF|default:0 }}</div>
+    <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.25rem">Actifs</div>
+  </div>
+
+  <div class="glass-card" style="text-align:center;padding:1.2rem">
+    <div style="font-size:1.8rem;font-weight:700;color:#fbbf24">{{ statut_counts.EN_ATTENTE|default:0 }}</div>
+    <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.25rem">En attente</div>
+  </div>
+
+  <div class="glass-card" style="text-align:center;padding:1.2rem">
+    <div style="font-size:1.8rem;font-weight:700;color:#f87171">{{ statut_counts.EXPIRE|default:0 }}</div>
+    <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.25rem">Expirés</div>
+  </div>
+
+  <div class="glass-card" style="text-align:center;padding:1.2rem">
+    <div style="font-size:1.8rem;font-weight:700;color:#fb923c">{{ bientot_expires }}</div>
+    <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.25rem">Expirent ≤ 90 j</div>
+  </div>
+
+  <div class="glass-card" style="text-align:center;padding:1.2rem">
+    <div style="font-size:1.4rem;font-weight:700;color:#93c5fd">{{ total_cout|floatformat:0 }} €</div>
+    <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.25rem">Coût annuel total</div>
+  </div>
+
+</div>
+
+<!-- ── 4 Cartes par type ─────────────────────────────────────────────── -->
+<h2 style="font-size:1rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:1rem">
+  Types de contrats
+</h2>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem">
+  {% for item in types %}
+  <a href="{% url 'contrats:contrat_type_list' contract_type=item.key %}"
+     class="glass-card"
+     style="text-decoration:none;color:inherit;border-left:4px solid {{ item.color }};transition:transform .2s,box-shadow .2s"
+     onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 40px rgba(0,0,0,0.4)'"
+     onmouseout="this.style.transform='';this.style.boxShadow=''">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
+      <!-- Icône -->
+      <div style="width:52px;height:52px;border-radius:14px;background:{{ item.bg }};
+                  display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0">
+        {{ item.icon }}
+      </div>
+      <!-- Compteur -->
+      <span class="badge" style="background:{{ item.bg }};color:{{ item.color }};font-size:1.3rem;font-weight:700;padding:0.3rem 0.8rem">
+        {{ item.count }}
+      </span>
+    </div>
+
+    <h2 style="margin:1rem 0 0.35rem;font-size:1.15rem;color:{{ item.color }}">{{ item.label }}</h2>
+    <p style="margin:0;color:var(--text-muted);font-size:0.87rem;line-height:1.5">{{ item.description }}</p>
+
+    <div style="margin-top:1.2rem;display:flex;align-items:center;gap:0.4rem;
+                color:{{ item.color }};font-size:0.85rem;font-weight:600">
+      Voir les contrats <span>→</span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+
+<!-- ── Lien fournisseurs ─────────────────────────────────────────────── -->
+<div style="margin-top:2rem">
+  <a href="{% url 'contrats:fournisseur_list' %}"
+     class="glass-card"
+     style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:1.2rem;
+            border-left:4px solid #64748b;transition:transform .2s"
+     onmouseover="this.style.transform='translateY(-2px)'"
+     onmouseout="this.style.transform=''">
+    <div style="width:48px;height:48px;border-radius:14px;background:rgba(100,116,139,0.12);
+                display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">
+      🏢
+    </div>
+    <div>
+      <div style="font-weight:700;font-size:1rem">Gestion des Fournisseurs</div>
+      <div style="color:var(--text-muted);font-size:0.87rem;margin-top:0.2rem">
+        Consulter, ajouter et modifier les fournisseurs liés aux contrats.
+      </div>
+    </div>
+    <span style="margin-left:auto;color:#64748b;font-size:1.2rem">→</span>
+  </a>
+</div>
+
+{% endblock %}

@@ -20,9 +20,9 @@
             </p>
         </div>
 
-        {% if form.errors %}
+        {% if auth_error_message %}
         <div class="alert error" style="margin-bottom: 1.5rem;">
-            ⚠ Identifiant ou mot de passe incorrect.
+            ⚠ {{ auth_error_message }}
         </div>
         {% endif %}
 
@@ -60,6 +60,12 @@
                 Se connecter
             </button>
         </form>
+
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="{% url 'password_reset' %}" style="color: #93c5fd; font-size: 0.9rem; text-decoration: none;">
+                Mot de passe oublié ?
+            </a>
+        </div>
 
     </div>
 </div>

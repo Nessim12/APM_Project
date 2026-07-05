@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'applications',
     'environments',
     'domaines',
+    'certificats_ssl',
+    'documentation',
+    'contrats',
 ]
 
 MIDDLEWARE = [
@@ -66,6 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'certificats_ssl.context_processors.ssl_notifications',
             ],
         },
     },
@@ -139,8 +143,47 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+SUPABASE_STORAGE_ENABLED = os.environ.get('SUPABASE_STORAGE_ENABLED', '').strip().lower() in ('1', 'true', 'yes')
+SUPABASE_STORAGE_BUCKET = os.environ.get('SUPABASE_STORAGE_BUCKET', '')
+SUPABASE_STORAGE_ACCESS_KEY = os.environ.get('SUPABASE_STORAGE_ACCESS_KEY', '')
+SUPABASE_STORAGE_SECRET_KEY = os.environ.get('SUPABASE_STORAGE_SECRET_KEY', '')
+SUPABASE_STORAGE_ENDPOINT = os.environ.get('SUPABASE_STORAGE_ENDPOINT', '')
+SUPABASE_STORAGE_REGION = os.environ.get('SUPABASE_STORAGE_REGION', 'eu-central-1')
+
+AWS_ACCESS_KEY_ID = SUPABASE_STORAGE_ACCESS_KEY
+AWS_SECRET_ACCESS_KEY = SUPABASE_STORAGE_SECRET_KEY
+AWS_STORAGE_BUCKET_NAME = SUPABASE_STORAGE_BUCKET
+AWS_S3_ENDPOINT_URL = SUPABASE_STORAGE_ENDPOINT
+AWS_S3_REGION_NAME = SUPABASE_STORAGE_REGION
+AWS_S3_ADDRESSING_STYLE = 'path'
+AWS_DEFAULT_ACL = None
+AWS_S3_FILE_OVERWRITE = False
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+
+if SUPABASE_STORAGE_ENABLED and not USE_SQLITE:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'config.storage_backends.SupabaseMediaStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
+else:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
 
 AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'login'
@@ -160,4 +203,13 @@ EMAIL_USE_TLS       = True
 EMAIL_HOST_USER     = 'nessimzitouni11@gmail.com'
 EMAIL_HOST_PASSWORD = 'dzzf oczr bwvu mhtr'
 DEFAULT_FROM_EMAIL  = 'APM Project <nessimzitouni11@gmail.com>'
+
+# ─── Alertes SSL ───────────────────────────────────────────────────────────────
+SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8000')
+SSL_ALERT_RAPPEL_JOURS = int(os.environ.get('SSL_ALERT_RAPPEL_JOURS', '7'))
+
+SMS_ENABLED = os.environ.get('SMS_ENABLED', '').strip().lower() in ('1', 'true', 'yes')
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
+TWILIO_FROM_NUMBER = os.environ.get('TWILIO_FROM_NUMBER', '')
 

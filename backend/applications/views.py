@@ -1,11 +1,16 @@
+from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.core.paginator import Paginator
+from django.urls import reverse
 
 from accounts.models import User
 from .forms import ApplicationFilterForm, ApplicationForm
 from .models import Application
+
+CertificatSSL = apps.get_model('ssl', 'CertificatSSL')
 
 
 def is_admin(user):
@@ -64,12 +69,24 @@ def _filtered_queryset(request):
 @user_passes_test(is_admin)
 def application_list(request):
     """Liste du patrimoine applicatif avec moteur de filtrage multicritères."""
-    applications, filter_form = _filtered_queryset(request)
+    applications_list, filter_form = _filtered_queryset(request)
+    paginator = Paginator(applications_list, 5)
+    page_number = request.GET.get('page')
+    applications = paginator.get_page(page_number)
+    
+    params = request.GET.copy()
+    if 'page' in params:
+        del params['page']
+    url_params = params.urlencode()
+    url_params_str = f"&{url_params}" if url_params else ""
+
     return render(
         request,
         'applications/application_list.html',
         {
             'applications': applications,
+            'page_obj': applications,
+            'url_params': url_params_str,
             'filter_form': filter_form,
         },
     )
@@ -85,7 +102,8 @@ def application_detail(request, pk):
             'responsable_technique',
             'chef_de_projet',
             'equipe_support',
-        ),
+            'certificat_ssl',
+        ).prefetch_related('documents'),
         pk=pk,
     )
     return render(
@@ -103,6 +121,12 @@ def application_create(request):
         form = ApplicationForm(request.POST)
         if form.is_valid():
             application = form.save()
+            if application.has_ssl:
+                messages.success(
+                    request,
+                    f'Application « {application.nom} » créée. Configurez maintenant son certificat SSL.',
+                )
+                return redirect(f"{reverse('ssl_create')}?application={application.pk}")
             messages.success(request, f'Application « {application.nom} » créée avec succès.')
             return redirect('application_detail', pk=application.pk)
     else:
@@ -124,7 +148,14 @@ def application_update(request, pk):
     if request.method == 'POST':
         form = ApplicationForm(request.POST, instance=application)
         if form.is_valid():
-            form.save()
+            had_ssl = application.has_ssl
+            application = form.save()
+            if application.has_ssl and not had_ssl and not CertificatSSL.objects.filter(application=application).exists():
+                messages.success(
+                    request,
+                    f'Application « {application.nom} » mise à jour. Configurez son certificat SSL.',
+                )
+                return redirect(f"{reverse('ssl_create')}?application={application.pk}")
             messages.success(request, f'Application « {application.nom} » mise à jour.')
             return redirect('application_detail', pk=application.pk)
     else:

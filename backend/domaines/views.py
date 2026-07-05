@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import get_object_or_404, redirect, render
+from django.core.paginator import Paginator
 
 from .forms import DomaineForm
 from .models import Domaine
@@ -14,15 +15,28 @@ def is_admin(user):
 @user_passes_test(is_admin)
 def domaine_list(request):
     query = request.GET.get('q', '').strip()
-    domaines = Domaine.objects.all()
+    domaines_list = Domaine.objects.all()
     if query:
-        domaines = domaines.filter(nom__icontains=query)
+        domaines_list = domaines_list.filter(nom__icontains=query)
+        
+    domaines_list = domaines_list.order_by('nom')
+    paginator = Paginator(domaines_list, 5)
+    page_number = request.GET.get('page')
+    domaines = paginator.get_page(page_number)
+    
+    params = request.GET.copy()
+    if 'page' in params:
+        del params['page']
+    url_params = params.urlencode()
+    url_params_str = f"&{url_params}" if url_params else ""
 
     return render(
         request,
         'domaines/domaine_list.html',
         {
-            'domaines': domaines.order_by('nom'),
+            'domaines': domaines,
+            'page_obj': domaines,
+            'url_params': url_params_str,
             'query': query,
         },
     )

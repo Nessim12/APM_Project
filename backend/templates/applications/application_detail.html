@@ -48,11 +48,58 @@
                 <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Fin de vie</div>
                 <div>{{ application.date_fin_vie|date:"d/m/Y"|default:"—" }}</div>
             </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Certificat SSL</div>
+                <div>
+                    {% if application.has_ssl %}
+                        <span class="badge tech">Requis</span>
+                        {% if application.certificat_ssl %}
+                            <a href="{% url 'ssl_detail' application.certificat_ssl.pk %}" class="btn" style="padding: 0.3rem 0.7rem; font-size: 0.8rem; margin-left: 0.5rem;">Voir le certificat</a>
+                        {% else %}
+                            <a href="{% url 'ssl_create' %}?application={{ application.pk }}" class="btn" style="padding: 0.3rem 0.7rem; font-size: 0.8rem; margin-left: 0.5rem;">Configurer SSL</a>
+                        {% endif %}
+                    {% else %}
+                        <span style="color: var(--text-muted);">Non requis</span>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         <div style="margin-top: 1.5rem;">
             <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Description</div>
             <div style="line-height: 1.6;">{{ application.description|linebreaksbr }}</div>
         </div>
+    </div>
+
+    <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">
+                Documentation
+            </h3>
+            <a href="{% url 'document_create' %}?type_gestion=APPLICATION&application={{ application.pk }}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                + Ajouter
+            </a>
+        </div>
+        {% if application.documents.all %}
+        <div class="doc-grid doc-grid-compact">
+            {% for doc in application.documents.all %}
+            <article class="doc-card doc-card-compact glass-card">
+                <div class="doc-card-icon">{{ doc.icone_fichier }}</div>
+                <div class="doc-card-body">
+                    <h4 class="doc-card-title">
+                        <a href="{% url 'document_detail' doc.pk %}">{{ doc.nom }}</a>
+                    </h4>
+                    <div class="doc-card-meta">
+                        <span class="badge">{{ doc.get_categorie_display }}</span>
+                        <span class="doc-type-label">{{ doc.type_fichier|upper }}</span>
+                    </div>
+                </div>
+                <a href="{% url 'document_download' doc.pk %}" class="btn doc-download-btn" style="padding: 0.35rem 0.7rem; font-size: 0.8rem;">⬇</a>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color: var(--text-muted);">Aucun document rattaché à cette application.</p>
+        {% endif %}
     </div>
 
     <div class="glass-card">
