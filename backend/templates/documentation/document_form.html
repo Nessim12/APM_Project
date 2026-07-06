@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Document — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <h1>{{ action }} un document</h1>
+        <a href="{% url 'document_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+    </div>
+
+    <div class="glass-card">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert error" style="margin-bottom: 1.5rem;">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label>Nom *</label>
+                {{ form.nom }}
+                {% if form.nom.errors %}<ul class="errorlist">{% for e in form.nom.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>Catégorie *</label>
+                    {{ form.categorie }}
+                    {% if form.categorie.errors %}<ul class="errorlist">{% for e in form.categorie.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Module de gestion *</label>
+                    {{ form.type_gestion }}
+                    {% if form.type_gestion.errors %}<ul class="errorlist">{% for e in form.type_gestion.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div class="form-group doc-relation-group" data-relation="APPLICATION">
+                <label>Application *</label>
+                {{ form.application }}
+                {% if form.application.errors %}<ul class="errorlist">{% for e in form.application.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group doc-relation-group" data-relation="ENVIRONNEMENT">
+                <label>Environnement *</label>
+                {{ form.environnement }}
+                {% if form.environnement.errors %}<ul class="errorlist">{% for e in form.environnement.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group doc-relation-group" data-relation="SSL">
+                <label>Certificat SSL *</label>
+                {{ form.certificat_ssl }}
+                {% if form.certificat_ssl.errors %}<ul class="errorlist">{% for e in form.certificat_ssl.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group doc-relation-group" data-relation="DOMAINE">
+                <label>Domaine *</label>
+                {{ form.domaine }}
+                {% if form.domaine.errors %}<ul class="errorlist">{% for e in form.domaine.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}<ul class="errorlist">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Fichier {% if not document %}*{% endif %}</label>
+                <div class="doc-upload-zone">
+                    {{ form.fichier }}
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.75rem;">
+                        PDF, PNG, JPG, DOC, DOCX, XLS, XLSX, TXT, ZIP… (max 50 Mo)
+                    </p>
+                </div>
+                {% if document and document.fichier %}
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;">
+                    Fichier actuel : {{ document.fichier.name|cut:"documents/" }}
+                </p>
+                {% endif %}
+                {% if form.fichier.errors %}<ul class="errorlist">{% for e in form.fichier.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    const typeSelect = document.getElementById('id_type_gestion');
+    const relationGroups = document.querySelectorAll('.doc-relation-group');
+
+    function updateRelationFields() {
+        const selected = typeSelect ? typeSelect.value : 'GENERAL';
+        relationGroups.forEach(function (group) {
+            const relation = group.getAttribute('data-relation');
+            group.style.display = (relation === selected) ? 'block' : 'none';
+        });
+    }
+
+    if (typeSelect) {
+        typeSelect.addEventListener('change', updateRelationFields);
+        updateRelationFields();
+    }
+})();
+</script>
+{% endblock %}

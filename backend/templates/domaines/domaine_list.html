@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestion des Domaines — APM{% endblock %}
+
+{% block content %}
+<div class="header-row">
+    <h1>Gestion des Domaines</h1>
+    <a href="{% url 'domaine_create' %}" class="btn">Nouveau Domaine</a>
+</div>
+
+<div class="glass-card" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+        Recherche
+    </h3>
+    <form method="get" action="{% url 'domaine_list' %}">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Nom</label>
+                <input type="search" name="q" value="{{ query }}" class="form-input" placeholder="Rechercher par nom…">
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn" style="flex: 1; justify-content: center;">Rechercher</button>
+                <a href="{% url 'domaine_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">Réinitialiser</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="glass-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Nom de domaine</th>
+                <th>Registrar</th>
+                <th>DNS</th>
+                <th>Responsable</th>
+                <th>Date expiration</th>
+                <th>Renouvellement auto.</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for domaine in domaines %}
+            <tr>
+                <td><a href="{% url 'domaine_detail' domaine.pk %}">{{ domaine.nom }}</a></td>
+                <td>{{ domaine.registrar }}</td>
+                <td>{{ domaine.dns }}</td>
+                <td>{{ domaine.responsable }}</td>
+                <td>{{ domaine.date_expiration|date:"d/m/Y" }}</td>
+                <td>{{ domaine.renouvellement_auto|yesno:"Oui,Non" }}</td>
+                <td style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="{% url 'domaine_detail' domaine.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Voir</a>
+                    <a href="{% url 'domaine_update' domaine.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Modifier</a>
+                    <a href="{% url 'domaine_delete' domaine.pk %}" class="btn danger" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Supprimer</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted);">Aucun domaine trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    {% include 'pagination.html' %}
+</div>
+{% endblock %}
