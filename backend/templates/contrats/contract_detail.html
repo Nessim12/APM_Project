@@ -23,7 +23,7 @@
             <form action="{% url 'contrats:contract_delete' contract.pk %}" method="post"
               style="display:inline">
       {% csrf_token %}
-      <button type="submit" class="btn danger">Supprimer</button>
+     
     </form>
     <a href="{% url 'contrats:contrat_type_list' contract_type=contract.contract_type %}"
        class="btn" style="background:transparent;border:1px solid var(--border)">← Retour</a>

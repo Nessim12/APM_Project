@@ -364,6 +364,7 @@
     {% if user.is_authenticated %}
     <nav class="top-navbar">
       <a href="{% url 'dashboard' %}" class="navbar-brand">APM Panel</a>
+      {% if user.role != 'ADMIN' %}
       <ul class="navbar-nav">
         <li>
           <a href="{% url 'application_list' %}" class="nav-item"
@@ -417,11 +418,12 @@
           <a href="{% url 'document_list' %}" class="nav-item">Documentation</a>
         </li>
       </ul>
+      {% endif %}
       <div class="navbar-actions">
         {% if user.role == 'TECH' %}
         <a href="{% url 'support_message_create' %}" class="nav-support-link" aria-label="Envoyer un message">✉</a>
         {% endif %}
-        {% if user.role == 'ADMIN' or user.role == 'ADMIN_SYS' %}
+        {% if user.role == 'ADMIN_SYS' %}
         <a href="{% url 'support_message_list' %}" class="nav-support-link" aria-label="Messages support">
           ✉
           {% if support_unread_messages %}
@@ -429,7 +431,7 @@
           {% endif %}
         </a>
         {% endif %}
-        {% if user.role == 'ADMIN' or user.role == 'ADMIN_SYS' %}
+        {% if user.role == 'ADMIN_SYS' %}
         <a
           href="{% url 'ssl_notifications' %}"
           class="nav-alert-link"

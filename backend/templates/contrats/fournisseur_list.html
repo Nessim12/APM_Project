@@ -156,11 +156,7 @@
                   <form action="{% url 'contrats:fournisseur_delete' f.pk %}" method="post"
                     style="display:inline">
             {% csrf_token %}
-            <button type="submit" class="btn danger"
-                    style="padding:0.3rem 0.65rem;font-size:0.82rem"
-                    {% if f.nb_contrats > 0 %}disabled title="Ce fournisseur a {{ f.nb_contrats }} contrat(s) lié(s)"{% endif %}>
-              Supprimer
-            </button>
+            
           </form>
         </td>
       </tr>

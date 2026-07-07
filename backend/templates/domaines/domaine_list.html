@@ -51,8 +51,7 @@
                 <td style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                     <a href="{% url 'domaine_detail' domaine.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Voir</a>
                     <a href="{% url 'domaine_update' domaine.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Modifier</a>
-                    <a href="{% url 'domaine_delete' domaine.pk %}" class="btn danger" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Supprimer</a>
-                </td>
+                    </td>
             </tr>
             {% empty %}
             <tr>
