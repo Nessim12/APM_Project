@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'domaines',
     'certificats_ssl',
     'documentation',
+    'contrats',
 ]
 
 MIDDLEWARE = [
@@ -146,7 +147,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = Path(os.environ.get('MEDIA_ROOT', '/data/media'))
 
 SUPABASE_STORAGE_ENABLED = os.environ.get('SUPABASE_STORAGE_ENABLED', '').strip().lower() in ('1', 'true', 'yes')
 SUPABASE_STORAGE_BUCKET = os.environ.get('SUPABASE_STORAGE_BUCKET', '')

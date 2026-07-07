@@ -7,11 +7,10 @@ from .models import Environnement, Server
 
 
 def is_admin(user):
-    return user.is_authenticated and user.role == 'ADMIN'
+    return user.is_authenticated and user.role != 'TECH'
 
 
 @login_required
-@user_passes_test(is_admin)
 def environment_list(request):
     query = request.GET.get('q', '').strip()
     environments = Environnement.objects.select_related('application', 'serveur')
@@ -29,14 +28,13 @@ def environment_list(request):
 
 
 @login_required
-@user_passes_test(is_admin)
 def environment_detail(request, pk):
     environment = get_object_or_404(Environnement.objects.select_related('application', 'serveur'), pk=pk)
     return render(request, 'environments/environment_detail.html', {'environment': environment})
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def environment_create(request):
     if request.method == 'POST':
         form = EnvironnementForm(request.POST)
@@ -51,7 +49,7 @@ def environment_create(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def environment_update(request, pk):
     environment = get_object_or_404(Environnement, pk=pk)
     if request.method == 'POST':
@@ -67,7 +65,7 @@ def environment_update(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def environment_delete(request, pk):
     environment = get_object_or_404(Environnement, pk=pk)
     if request.method == 'POST':
@@ -77,8 +75,6 @@ def environment_delete(request, pk):
     return render(request, 'environments/environment_confirm_delete.html', {'environment': environment})
 
 
-@login_required
-@user_passes_test(is_admin)
 def server_list(request):
     query = request.GET.get('q', '').strip()
     servers = Server.objects.all()
@@ -96,7 +92,7 @@ def server_list(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def server_create(request):
     if request.method == 'POST':
         form = ServerForm(request.POST)
@@ -111,7 +107,7 @@ def server_create(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def server_update(request, pk):
     server = get_object_or_404(Server, pk=pk)
     if request.method == 'POST':
@@ -127,7 +123,7 @@ def server_update(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def server_delete(request, pk):
     server = get_object_or_404(Server, pk=pk)
     if request.method == 'POST':

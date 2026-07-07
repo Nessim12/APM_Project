@@ -13,7 +13,7 @@ from .models import Document
 
 
 def is_admin(user):
-    return user.is_authenticated and user.role == 'ADMIN'
+    return user.is_authenticated and user.role != 'TECH'
 
 
 def _filtered_queryset(request):
@@ -43,7 +43,6 @@ def _filtered_queryset(request):
 
 
 @login_required
-@user_passes_test(is_admin)
 def document_list(request):
     queryset, filter_form = _filtered_queryset(request)
     paginator = Paginator(queryset, 9)
@@ -65,7 +64,6 @@ def document_list(request):
 
 
 @login_required
-@user_passes_test(is_admin)
 def document_detail(request, pk):
     document = get_object_or_404(
         Document.objects.select_related(
@@ -77,7 +75,7 @@ def document_detail(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def document_create(request):
     initial_kwargs = {}
     if request.GET.get('type_gestion'):
@@ -109,7 +107,7 @@ def document_create(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def document_update(request, pk):
     document = get_object_or_404(Document, pk=pk)
     if request.method == 'POST':
@@ -129,7 +127,7 @@ def document_update(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def document_delete(request, pk):
     document = get_object_or_404(Document, pk=pk)
     if request.method == 'POST':
@@ -143,7 +141,6 @@ def document_delete(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
 def document_preview(request, pk):
     document = get_object_or_404(Document, pk=pk)
     if not document.fichier:
@@ -159,7 +156,6 @@ def document_preview(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
 def document_download(request, pk):
     document = get_object_or_404(Document, pk=pk)
     if not document.fichier:

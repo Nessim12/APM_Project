@@ -10,8 +10,7 @@
             <a href="{% url 'application_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
             <a href="{% url 'application_update' application.pk %}" class="btn">Modifier</a>
             {% if application.statut != 'ARCHIVE' %}
-            <form action="{% url 'application_archive' application.pk %}" method="post" style="display:inline;"
-                  onsubmit="return confirm('Archiver cette application ?');">
+            <form action="{% url 'application_archive' application.pk %}" method="post" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn danger">Archiver</button>
             </form>

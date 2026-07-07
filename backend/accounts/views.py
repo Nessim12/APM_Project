@@ -18,15 +18,24 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.utils import timezone
 
-from .models import User
+from .models import SupportMessage, User
 from .forms import UserForm, ProfileForm, ExcelImportForm, UserFilterForm
 
 
 # ─── Helpers ───────────────────────────────────────────────────────────────────
 
 def is_admin(user):
+    return user.is_authenticated and user.role != User.RoleChoices.TECH
+
+
+def can_manage_users(user):
     return user.is_authenticated and user.role == User.RoleChoices.ADMIN
+
+
+def can_send_support_message(user):
+    return user.is_authenticated and user.role == User.RoleChoices.TECH
 
 
 def generate_password(length=10):
@@ -75,10 +84,7 @@ class CustomLoginView(LoginView):
         return context
 
     def get_success_url(self):
-        user = self.request.user
-        if user.role == User.RoleChoices.ADMIN:
-            return '/dashboard/'
-        return '/profile/'
+        return '/dashboard/'
 
 
 class CustomPasswordResetView(PasswordResetView):
@@ -101,10 +107,9 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'accounts/password_reset_complete.html'
 
 
-# ─── Admin: User Management Dashboard ─────────────────────────────────────────
+# ─── User Management Dashboard ────────────────────────────────────────────────
 
 @login_required
-@user_passes_test(is_admin)
 def dashboard(request):
     users_list = User.objects.exclude(is_superuser=True)
     
@@ -173,12 +178,14 @@ def dashboard(request):
         'url_params': url_params_str,
         'filter_form': filter_form,
         'sort_by': sort_by,
-        'sort_urls': sort_urls
+        'sort_urls': sort_urls,
+        'can_manage_users': can_manage_users(request.user),
+        'current_role': request.user.role,
     })
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(can_manage_users, login_url='dashboard')
 def user_create(request):
     if request.method == 'POST':
         form = UserForm(request.POST)
@@ -203,7 +210,7 @@ def user_create(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(can_manage_users, login_url='dashboard')
 def user_update(request, pk):
     user = get_object_or_404(User, pk=pk)
     if request.method == 'POST':
@@ -218,7 +225,7 @@ def user_update(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(can_manage_users, login_url='dashboard')
 def user_toggle_active(request, pk):
     user = get_object_or_404(User, pk=pk)
     if request.method == 'POST':
@@ -230,7 +237,7 @@ def user_toggle_active(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(can_manage_users, login_url='dashboard')
 def user_import_excel(request):
     if request.method == 'POST':
         form = ExcelImportForm(request.POST, request.FILES)
@@ -293,13 +300,10 @@ def user_import_excel(request):
     return render(request, 'accounts/import_excel.html', {'form': form})
 
 
-# ─── User: Own Profile (MEMBRE / TECH) ────────────────────────────────────────
+# ─── User: Own Profile ────────────────────────────────────────────────────────
 
 @login_required
 def profile(request):
-    if request.user.role == User.RoleChoices.ADMIN:
-        return redirect('dashboard')
-
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=request.user)
         if form.is_valid():
@@ -310,3 +314,44 @@ def profile(request):
         form = ProfileForm(instance=request.user)
 
     return render(request, 'accounts/profile.html', {'form': form})
+
+
+@login_required
+@user_passes_test(lambda user: user.role in {User.RoleChoices.ADMIN, User.RoleChoices.ADMIN_SYS}, login_url='dashboard')
+def support_message_list(request):
+    messages_qs = SupportMessage.objects.select_related('sender').all()
+    unread_count = messages_qs.filter(lue=False).count()
+    return render(request, 'accounts/support_message_list.html', {
+        'support_messages': messages_qs,
+        'unread_count': unread_count,
+    })
+
+
+@login_required
+@user_passes_test(can_send_support_message, login_url='dashboard')
+def support_message_create(request):
+    if request.method == 'POST':
+        subject = (request.POST.get('subject') or '').strip()
+        message = (request.POST.get('message') or '').strip()
+        if subject and message:
+            SupportMessage.objects.create(
+                sender=request.user,
+                subject=subject,
+                message=message,
+            )
+            messages.success(request, 'Votre message a été envoyé à l’administrateur.')
+            return redirect('support_message_create')
+        messages.error(request, 'Veuillez renseigner le sujet et le message.')
+
+    return render(request, 'accounts/support_message_form.html')
+
+
+@login_required
+@user_passes_test(lambda user: user.role in {User.RoleChoices.ADMIN, User.RoleChoices.ADMIN_SYS}, login_url='dashboard')
+def support_message_mark_read(request, pk):
+    support_message = get_object_or_404(SupportMessage, pk=pk)
+    support_message.lue = True
+    support_message.read_at = timezone.now()
+    support_message.save(update_fields=['lue', 'read_at'])
+    messages.success(request, 'Message marqué comme lu.')
+    return redirect('support_message_list')

@@ -4,13 +4,65 @@
 
 {% block content %}
 <div class="header-row">
+    {% if can_manage_users %}
     <h1>Gestion des Utilisateurs</h1>
-    <div style="display: flex; gap: 1rem;">
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
         <a href="{% url 'user_import_excel' %}" class="btn success">Import Excel</a>
         <a href="{% url 'user_create' %}" class="btn">Nouveau Utilisateur</a>
     </div>
+    {% else %}
+    <div>
+        <h1>APM Panel</h1>
+        <p style="color: var(--text-muted); margin-top: 0.35rem;">Vue d'accueil et accès rapide selon votre rôle.</p>
+    </div>
+    {% endif %}
 </div>
 
+{% if not can_manage_users %}
+<div class="glass-card" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">Accès rapide</h3>
+    <div class="doc-grid doc-grid-compact">
+        <article class="doc-card glass-card">
+            <div class="doc-card-body">
+                <h3 class="doc-card-title"><a href="{% url 'application_list' %}">Gestion des applications</a></h3>
+                <p class="doc-card-desc">Consulter les applications et leurs métadonnées.</p>
+            </div>
+        </article>
+        <article class="doc-card glass-card">
+            <div class="doc-card-body">
+                <h3 class="doc-card-title"><a href="{% url 'environment_list' %}">Gestion des environnements</a></h3>
+                <p class="doc-card-desc">Accès aux environnements et serveurs.</p>
+            </div>
+        </article>
+        <article class="doc-card glass-card">
+            <div class="doc-card-body">
+                <h3 class="doc-card-title"><a href="{% url 'ssl_list' %}">Gestion SSL</a></h3>
+                <p class="doc-card-desc">Suivi des certificats SSL et alertes.</p>
+            </div>
+        </article>
+        <article class="doc-card glass-card">
+            <div class="doc-card-body">
+                <h3 class="doc-card-title"><a href="{% url 'domaine_list' %}">Gestion des domaines</a></h3>
+                <p class="doc-card-desc">Voir et gérer les domaines rattachés.</p>
+            </div>
+        </article>
+        <article class="doc-card glass-card">
+            <div class="doc-card-body">
+                <h3 class="doc-card-title"><a href="{% url 'document_list' %}">Documentation</a></h3>
+                <p class="doc-card-desc">Parcourir et téléverser les documents.</p>
+            </div>
+        </article>
+        <article class="doc-card glass-card">
+            <div class="doc-card-body">
+                <h3 class="doc-card-title"><a href="{% url 'contrats:contrat_dashboard' %}">Contrats</a></h3>
+                <p class="doc-card-desc">Accéder au tableau de bord des contrats.</p>
+            </div>
+        </article>
+    </div>
+</div>
+{% endif %}
+
+{% if can_manage_users %}
 <div class="glass-card" style="margin-bottom: 2rem;">
     <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
         Recherche & Filtres
@@ -97,16 +149,22 @@
                         <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">Inactif</span>
                     {% endif %}
                 </td>
-                <td style="display: flex; gap: 0.5rem;">
-                    <a href="{% url 'user_update' u.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Modifier</a>
-                    <form action="{% url 'user_toggle_active' u.pk %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        {% if u.is_active %}
-                            <button type="submit" class="btn danger" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Désactiver</button>
-                        {% else %}
-                            <button type="submit" class="btn success" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Activer</button>
-                        {% endif %}
-                    </form>
+                <td>
+                    {% if can_manage_users %}
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a href="{% url 'user_update' u.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Modifier</a>
+                        <form action="{% url 'user_toggle_active' u.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            {% if u.is_active %}
+                                <button type="submit" class="btn danger" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Désactiver</button>
+                            {% else %}
+                                <button type="submit" class="btn success" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Activer</button>
+                            {% endif %}
+                        </form>
+                    </div>
+                    {% else %}
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Lecture seule</span>
+                    {% endif %}
                 </td>
             </tr>
             {% empty %}
@@ -119,4 +177,5 @@
     
     {% include 'pagination.html' %}
 </div>
+{% endif %}
 {% endblock %}

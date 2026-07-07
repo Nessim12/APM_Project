@@ -1,0 +1,321 @@
+{% extends 'base.html' %} {% block title %}Contrats {{ contract_type_label }} —
+APM{% endblock %} {% block content %}
+
+<!-- ── En-tête ───────────────────────────────────────────────────────── -->
+<div class="header-row">
+  <div style="display: flex; align-items: center; gap: 1rem">
+    <div
+      style="width:52px;height:52px;border-radius:14px;background:{{ type_meta.bg }};
+                display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0"
+    >
+      {{ type_meta.icon }}
+    </div>
+    <div>
+      <h1 style="margin: 0">Contrats {{ contract_type_label }}</h1>
+      <p
+        style="color: var(--text-muted); margin: 0.2rem 0 0; font-size: 0.9rem"
+      >
+        Liste, recherche, filtres et tri.
+      </p>
+    </div>
+  </div>
+  <div
+    style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center"
+  >
+    <a
+      href="{% url 'contrats:contract_create' %}?type={{ contract_type }}"
+      class="btn"
+      >+ Nouveau contrat</a
+    >
+    <a
+      href="{% url 'contrats:contrat_dashboard' %}"
+      class="btn"
+      style="background: transparent; border: 1px solid var(--border)"
+      >← Retour</a
+    >
+  </div>
+</div>
+
+<!-- ── Stats rapides ─────────────────────────────────────────────────── -->
+<div
+  style="
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  "
+>
+  <div class="glass-card" style="text-align: center; padding: 1rem">
+    <div style="font-size:1.6rem;font-weight:700;color:{{ type_meta.color }}">
+      {{ stats.total }}
+    </div>
+    <div
+      style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.2rem"
+    >
+      Total
+    </div>
+  </div>
+  <div class="glass-card" style="text-align: center; padding: 1rem">
+    <div style="font-size: 1.6rem; font-weight: 700; color: #34d399">
+      {{ stats.actifs }}
+    </div>
+    <div
+      style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.2rem"
+    >
+      Actifs
+    </div>
+  </div>
+  <div class="glass-card" style="text-align: center; padding: 1rem">
+    <div style="font-size: 1.6rem; font-weight: 700; color: #f87171">
+      {{ stats.expires }}
+    </div>
+    <div
+      style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.2rem"
+    >
+      Expirés
+    </div>
+  </div>
+  <div class="glass-card" style="text-align: center; padding: 1rem">
+    <div style="font-size: 1.6rem; font-weight: 700; color: #fb923c">
+      {{ stats.bientot }}
+    </div>
+    <div
+      style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.2rem"
+    >
+      Expirent ≤ 90 j
+    </div>
+  </div>
+</div>
+
+<!-- ── Filtres ───────────────────────────────────────────────────────── -->
+<div class="glass-card" style="margin-bottom: 1.5rem">
+  <h3
+    style="
+      margin-bottom: 1.2rem;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    "
+  >
+    Filtres de recherche
+  </h3>
+  <form
+    method="get"
+    action="{% url 'contrats:contrat_type_list' contract_type=contract_type %}"
+  >
+    <div
+      style="
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 1rem;
+        align-items: end;
+      "
+    >
+      <div class="form-group" style="margin-bottom: 0">
+        <label>{{ filter_form.q.label }}</label>
+        {{ filter_form.q }}
+      </div>
+      <div class="form-group" style="margin-bottom: 0">
+        <label>{{ filter_form.application.label }}</label>
+        {{ filter_form.application }}
+      </div>
+      <div class="form-group" style="margin-bottom: 0">
+        <label>{{ filter_form.fournisseur.label }}</label>
+        {{ filter_form.fournisseur }}
+      </div>
+      <div class="form-group" style="margin-bottom: 0">
+        <label>{{ filter_form.statut.label }}</label>
+        {{ filter_form.statut }}
+      </div>
+      <div class="form-group" style="margin-bottom: 0">
+        <label>{{ filter_form.order_by.label }}</label>
+        {{ filter_form.order_by }}
+      </div>
+
+      <div style="display: flex; gap: 0.5rem">
+        <button
+          type="submit"
+          class="btn"
+          style="flex: 1; justify-content: center"
+        >
+          Filtrer
+        </button>
+        <a
+          href="{% url 'contrats:contrat_type_list' contract_type=contract_type %}"
+          class="btn"
+          style="background: transparent; border: 1px solid var(--border)"
+          >Réinitialiser</a
+        >
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- ── Table ─────────────────────────────────────────────────────────── -->
+<div class="glass-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Numéro</th>
+        <th>Application</th>
+        <th>Fournisseur</th>
+        <th>Date début</th>
+        <th>Date fin</th>
+        <th>Jours restants</th>
+        <th>Coût annuel</th>
+        <th>SLA</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for contract in contracts %}
+      <tr>
+        <!-- Numéro -->
+        <td>
+          <a
+            href="{% url 'contrats:contract_detail' contract.pk %}"
+            style="color:{{ type_meta.color }};text-decoration:none;font-weight:600"
+          >
+            {{ contract.numero_contrat }}
+          </a>
+        </td>
+
+        <!-- Application (lien vers fiche appli) -->
+        <td>
+          <a
+            href="{% url 'application_detail' contract.application.pk %}"
+            style="color: #93c5fd; text-decoration: none"
+          >
+            {{ contract.application.nom }}
+          </a>
+        </td>
+
+        <!-- Fournisseur -->
+        <td>{{ contract.fournisseur.nom }}</td>
+
+        <!-- Dates -->
+        <td>{{ contract.date_debut|date:'d/m/Y' }}</td>
+        <td>{{ contract.date_fin|date:'d/m/Y' }}</td>
+
+        <!-- Jours restants -->
+        <td>
+          {% with jr=contract.jours_restants %} {% if jr < 0 %}
+          <span
+            class="badge"
+            style="
+              background: rgba(239, 68, 68, 0.12);
+              color: #f87171;
+              white-space: nowrap;
+            "
+          >
+            {{ contract.jours_restants_label }}
+          </span>
+          {% elif jr <= 30 %}
+          <span
+            class="badge"
+            style="
+              background: rgba(239, 68, 68, 0.12);
+              color: #f87171;
+              white-space: nowrap;
+            "
+          >
+            ⚠ {{ jr }} j
+          </span>
+          {% elif jr <= 90 %}
+          <span
+            class="badge"
+            style="
+              background: rgba(251, 191, 36, 0.12);
+              color: #fbbf24;
+              white-space: nowrap;
+            "
+          >
+            {{ jr }} j
+          </span>
+          {% else %}
+          <span style="color: var(--text-muted)">{{ jr }} j</span>
+          {% endif %} {% endwith %}
+        </td>
+
+        <!-- Coût annuel -->
+        <td style="font-weight: 600">
+          {{ contract.cout_annuel|floatformat:0 }} د.ج
+        </td>
+
+        <!-- SLA -->
+        <td style="color: var(--text-muted); font-size: 0.87rem">
+          {{ contract.sla }}
+        </td>
+
+        <!-- Statut badge -->
+        <td>
+          {% if contract.statut == 'ACTIF' %}
+          <span
+            class="badge"
+            style="background: rgba(16, 185, 129, 0.12); color: #34d399"
+            >Actif</span
+          >
+          {% elif contract.statut == 'EN_ATTENTE' %}
+          <span
+            class="badge"
+            style="background: rgba(251, 191, 36, 0.12); color: #fbbf24"
+            >En attente</span
+          >
+          {% else %}
+          <span
+            class="badge"
+            style="background: rgba(239, 68, 68, 0.12); color: #f87171"
+            >Expiré</span
+          >
+          {% endif %}
+        </td>
+
+        <!-- Actions -->
+        <td style="display: flex; gap: 0.4rem; flex-wrap: wrap">
+          <a
+            href="{% url 'contrats:contract_detail' contract.pk %}"
+            class="btn"
+            style="padding: 0.3rem 0.65rem; font-size: 0.82rem"
+            >Voir</a
+          >
+          <a
+            href="{% url 'contrats:contract_update' contract.pk %}"
+            class="btn"
+            style="padding: 0.3rem 0.65rem; font-size: 0.82rem"
+            >Modifier</a
+          >
+          <form
+            action="{% url 'contrats:contract_delete' contract.pk %}"
+            method="post"
+            style="display: inline"
+          >
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="btn danger"
+              style="padding: 0.3rem 0.65rem; font-size: 0.82rem"
+            >
+              Supprimer
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td
+          colspan="10"
+          style="text-align: center; color: var(--text-muted); padding: 2rem"
+        >
+          Aucun contrat {{ contract_type_label|lower }} trouvé.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% include 'pagination.html' %}
+</div>
+
+{% endblock %}

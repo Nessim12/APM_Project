@@ -35,7 +35,7 @@ NIVEAU_PRIORITE = {
 
 def get_admins():
     return User.objects.filter(
-        role=User.RoleChoices.ADMIN,
+        role__in=[User.RoleChoices.ADMIN, User.RoleChoices.ADMIN_SYS],
         is_active=True,
     ).exclude(email='')
 

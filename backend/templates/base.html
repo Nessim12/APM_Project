@@ -1,45 +1,149 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}APM Dashboard{% endblock %}</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5" />
     <style>
-        /* Critical layout — ensures top navbar even if CSS cache is stale */
-        body { flex-direction: column !important; }
-        .top-navbar {
-            display: grid !important;
-            grid-template-columns: 1fr auto 1fr;
-            align-items: center;
-            width: 100%;
-            height: 64px;
-            padding: 0 1.5rem;
-            gap: 1rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            flex-shrink: 0;
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .navbar-brand { justify-self: start; }
-        .navbar-nav {
-            display: flex !important;
-            list-style: none;
-            justify-content: center;
-            justify-self: center;
-            gap: 0.25rem;
-            align-items: center;
-            overflow-x: auto;
-            margin: 0;
-            padding: 0;
-        }
-        .navbar-nav li { list-style: none; }
-        .profile-trigger {
-            justify-self: end;
+      /* Critical layout — ensures top navbar even if CSS cache is stale */
+      body {
+        flex-direction: column !important;
+      }
+      .top-navbar {
+        display: grid !important;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        width: 100%;
+        height: 64px;
+        padding: 0 1.5rem;
+        gap: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        flex-shrink: 0;
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .navbar-brand {
+        justify-self: start;
+      }
+      .navbar-nav {
+        display: flex !important;
+        list-style: none;
+        justify-content: center;
+        justify-self: center;
+        gap: 0.25rem;
+        align-items: center;
+        overflow: visible; /* était overflow-x: auto — clippait le menu déroulant en absolute */
+        flex-wrap: wrap;
+        margin: 0;
+        padding: 0;
+      }
+      .navbar-nav li {
+        list-style: none;
+      }
+      .nav-dropdown {
+        position: relative;
+        overflow: visible;
+      }
+      .nav-dropdown summary {
+        list-style: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 0.9rem;
+        border-radius: 999px;
+        background: transparent;
+        border: none;
+        text-decoration: none;
+        color: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+      .nav-dropdown summary:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .nav-dropdown summary::-webkit-details-marker,
+      .nav-dropdown summary::marker {
+        display: none;
+        content: none;
+      }
+      .nav-dropdown-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 0.3rem;
+        border-radius: 999px;
+        color: inherit;
+      }
+      .nav-dropdown[open] .nav-caret {
+        transform: rotate(180deg);
+      }
+
+      .nav-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 0.6rem);
+        left: 50%;
+        transform: translateX(-50%) translateY(-6px);
+        min-width: 260px;
+        background: linear-gradient(
+          180deg,
+          rgba(17, 24, 39, 0.98),
+          rgba(7, 10, 20, 0.98)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 0.5rem 0;
+        box-shadow: 0 24px 60px rgba(2, 6, 23, 0.6);
+        display: none;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+          opacity 0.18s ease,
+          transform 0.18s ease,
+          visibility 0.18s;
+        z-index: 800;
+      }
+      .nav-dropdown[open] .nav-dropdown-menu,
+      .nav-dropdown:hover .nav-dropdown-menu,
+      .nav-dropdown:focus-within .nav-dropdown-menu {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateX(-50%) translateY(0);
+      }
+      .nav-dropdown[open] .nav-caret {
+        transform: rotate(180deg);
+      }
+
+      .nav-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.9rem 1.1rem;
+        color: #e6eef8;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.12s ease;
+      }
+      .nav-dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .nav-item-icon {
+        width: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+      }
+      .profile-trigger {
+        justify-self: end;
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
@@ -53,13 +157,13 @@
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
-        .profile-trigger:hover {
-            transform: translateY(-1px);
+      .profile-trigger:hover {
+         transform: translateY(-1px);
             border-color: rgba(96, 165, 250, 0.45);
             box-shadow: 0 12px 28px rgba(59, 130, 246, 0.18);
         }
-        .profile-trigger-avatar {
-            width: 34px;
+      .profile-trigger-avatar {
+       width: 34px;
             height: 34px;
             border-radius: 50%;
             display: inline-flex;
@@ -71,288 +175,617 @@
             font-weight: 700;
             letter-spacing: 0.03em;
             flex-shrink: 0;
+      }
+      .profile-trigger-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .profile-trigger-caret {
+        font-size: 0.8rem;
+        color: rgba(248, 250, 252, 0.72);
+      }
+      .profile-panel {
+        position: fixed !important;
+        top: 0;
+        right: 0;
+        width: 340px;
+        max-width: 90vw;
+        height: 100vh;
+        transform: translateX(100%);
+        z-index: 200;
+        transition: transform 0.3s ease;
+      }
+      .profile-panel.open {
+        transform: translateX(0);
+      }
+      .profile-overlay {
+        position: fixed !important;
+        inset: 0;
+        visibility: hidden;
+        opacity: 0;
+        z-index: 150;
+        background: rgba(0, 0, 0, 0.55);
+        transition:
+          opacity 0.3s ease,
+          visibility 0.3s ease;
+      }
+      .profile-overlay.open {
+        visibility: visible;
+        opacity: 1;
+      }
+      .main-content {
+        width: 100% !important;
+        flex: 1;
+      }
+      /* Critical notification styles — toast en haut à droite */
+      .floating-notification-container {
+        position: fixed !important;
+        top: 80px;
+        right: 24px;
+        display: flex !important;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 10000;
+        width: 380px;
+        max-width: calc(100vw - 48px);
+        pointer-events: none;
+      }
+      .floating-notification {
+        pointer-events: auto;
+        background-color: #121212;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 16px;
+        color: #e5e5e5;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+        display: flex !important;
+        flex-direction: column;
+        gap: 10px;
+        animation: notifPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        transition:
+          opacity 0.4s,
+          transform 0.4s;
+      }
+      @keyframes notifPopIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px) scale(0.95);
         }
-        .profile-trigger-label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            white-space: nowrap;
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
         }
-        .profile-trigger-caret {
-            font-size: 0.8rem;
-            color: rgba(248, 250, 252, 0.72);
-        }
-        .profile-panel {
-            position: fixed !important;
-            top: 0;
-            right: 0;
-            width: 340px;
-            max-width: 90vw;
-            height: 100vh;
-            transform: translateX(100%);
-            z-index: 200;
-            transition: transform 0.3s ease;
-        }
-        .profile-panel.open { transform: translateX(0); }
-        .profile-overlay {
-            position: fixed !important;
-            inset: 0;
-            visibility: hidden;
-            opacity: 0;
-            z-index: 150;
-            background: rgba(0, 0, 0, 0.55);
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .profile-overlay.open { visibility: visible; opacity: 1; }
-        .main-content { width: 100% !important; flex: 1; }
-        /* Critical notification styles — toast en haut à droite */
-        .floating-notification-container {
-            position: fixed !important;
-            top: 80px;
-            right: 24px;
-            display: flex !important;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 10000;
-            width: 380px;
-            max-width: calc(100vw - 48px);
-            pointer-events: none;
-        }
-        .floating-notification {
-            pointer-events: auto;
-            background-color: #121212;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 16px;
-            color: #e5e5e5;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-            display: flex !important;
-            flex-direction: column;
-            gap: 10px;
-            animation: notifPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            transition: opacity 0.4s, transform 0.4s;
-        }
-        @keyframes notifPopIn {
-            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .fn-title { font-weight: 600; font-size: 0.95rem; color: #ffffff; }
-        .floating-notification.success .fn-title { color: #34d399; }
-        .floating-notification.error .fn-title { color: #f87171; }
-        .floating-notification.warning .fn-title { color: #fbbf24; }
-        .floating-notification.info .fn-title { color: #93c5fd; }
-        .fn-body {
-            font-size: 0.85rem;
-            line-height: 1.5;
-            color: #a3a3a3;
-            max-height: 250px;
-            overflow-y: auto;
-        }
-        .fn-actions { display: flex; justify-content: flex-end; margin-top: 4px; }
-        .btn-dismiss {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #a3a3a3;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            padding: 6px 12px;
-            border-radius: 6px;
-        }
-        .btn-dismiss:hover { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
-        .nav-alert-link {
-            justify-self: end;
-            margin-right: 0.75rem;
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #e2e8f0;
-            text-decoration: none;
-            background: rgba(255, 255, 255, 0.04);
-        }
-        .nav-alert-badge {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            min-width: 18px;
-            height: 18px;
-            padding: 0 5px;
-            border-radius: 999px;
-            background: #ef4444;
-            color: #fff;
-            font-size: 0.7rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .navbar-actions {
-            justify-self: end;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+      }
+      .fn-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #ffffff;
+      }
+      .floating-notification.success .fn-title {
+        color: #34d399;
+      }
+      .floating-notification.error .fn-title {
+        color: #f87171;
+      }
+      .floating-notification.warning .fn-title {
+        color: #fbbf24;
+      }
+      .floating-notification.info .fn-title {
+        color: #93c5fd;
+      }
+      .fn-body {
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: #a3a3a3;
+        max-height: 250px;
+        overflow-y: auto;
+      }
+      .fn-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 4px;
+      }
+      .btn-dismiss {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #a3a3a3;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 6px 12px;
+        border-radius: 6px;
+      }
+      .btn-dismiss:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .nav-alert-link {
+        justify-self: end;
+        margin-right: 0.75rem;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #e2e8f0;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .nav-support-link {
+        justify-self: end;
+        margin-right: 0.75rem;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #e2e8f0;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      }
+      .nav-support-link:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.16);
+      }
+      .nav-alert-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 999px;
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .navbar-actions {
+        justify-self: end;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     {% if user.is_authenticated %}
     <nav class="top-navbar">
-        <a href="{% if user.role == 'ADMIN' %}{% url 'dashboard' %}{% else %}{% url 'profile' %}{% endif %}" class="navbar-brand">APM Panel</a>
-        <ul class="navbar-nav">
-            <li><a href="{% url 'application_list' %}" class="nav-item">Gestion des applications</a></li>
-            <li><a href="{% url 'environment_list' %}" class="nav-item">Gestion des environnements</a></li>
-            <li><a href="{% url 'ssl_list' %}" class="nav-item">Gestion SSL</a></li>
-            <li><a href="{% url 'domaine_list' %}" class="nav-item">Gestion des Domaines</a></li>
-            <li><a href="#" class="nav-item">Gestion des Contrats</a></li>
-            <li><a href="{% url 'document_list' %}" class="nav-item">Documentation</a></li>
-        </ul>
-        <div class="navbar-actions">
-            {% if user.role == 'ADMIN' %}
-            <a href="{% url 'ssl_notifications' %}" class="nav-alert-link" aria-label="Alertes SSL">
-                &#128276;
-                {% if ssl_unread_notifications %}
-                <span class="nav-alert-badge">{{ ssl_unread_notifications }}</span>
-                {% endif %}
-            </a>
-            {% endif %}
-            <button type="button" class="profile-trigger" id="profileTrigger" aria-label="Ouvrir le profil">
-                <span class="profile-trigger-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
-                <span class="profile-trigger-label">Mon profil</span>
-                <span class="profile-trigger-caret">▾</span>
-            </button>
-        </div>
+      <a href="{% url 'dashboard' %}" class="navbar-brand">APM Panel</a>
+      <ul class="navbar-nav">
+        <li>
+          <a href="{% url 'application_list' %}" class="nav-item"
+            >Gestion des applications</a
+          >
+        </li>
+        <li>
+          <a href="{% url 'environment_list' %}" class="nav-item"
+            >Gestion des environnements</a
+          >
+        </li>
+        <li><a href="{% url 'ssl_list' %}" class="nav-item">Gestion SSL</a></li>
+        <li>
+          <a href="{% url 'domaine_list' %}" class="nav-item"
+            >Gestion des Domaines</a
+          >
+        </li>
+        <li>
+          <details class="nav-dropdown" id="contractsDropdown">
+            <summary id="contractsDropdownLink" class="nav-item nav-dropdown-trigger">
+              <span>Gestion des Contrats</span>
+              <span
+                id="contractsDropdownToggleBtn"
+                class="nav-dropdown-toggle"
+                aria-hidden="true"
+                >▾</span
+              >
+            </summary>
+            <div
+              class="nav-dropdown-menu"
+              id="contractsDropdownMenu"
+              role="menu"
+              aria-labelledby="contractsDropdownToggleBtn"
+            >
+              <a
+                href="{% url 'contrats:contrat_dashboard' %}"
+                class="nav-dropdown-item"
+                role="menuitem"
+                ><span class="nav-item-icon">📄</span><span>Contrat</span></a
+              >
+              <a
+                href="{% url 'contrats:fournisseur_list' %}"
+                class="nav-dropdown-item"
+                role="menuitem"
+                ><span class="nav-item-icon">🏢</span><span>Fournisseurs</span></a
+              >
+            </div>
+          </details>
+        </li>
+        <li>
+          <a href="{% url 'document_list' %}" class="nav-item">Documentation</a>
+        </li>
+      </ul>
+      <div class="navbar-actions">
+        {% if user.role == 'TECH' %}
+        <a href="{% url 'support_message_create' %}" class="nav-support-link" aria-label="Envoyer un message">✉</a>
+        {% endif %}
+        {% if user.role == 'ADMIN' or user.role == 'ADMIN_SYS' %}
+        <a href="{% url 'support_message_list' %}" class="nav-support-link" aria-label="Messages support">
+          ✉
+          {% if support_unread_messages %}
+          <span class="nav-alert-badge">{{ support_unread_messages }}</span>
+          {% endif %}
+        </a>
+        {% endif %}
+        {% if user.role == 'ADMIN' or user.role == 'ADMIN_SYS' %}
+        <a
+          href="{% url 'ssl_notifications' %}"
+          class="nav-alert-link"
+          aria-label="Alertes SSL"
+        >
+          &#128276; {% if ssl_unread_notifications %}
+          <span class="nav-alert-badge">{{ ssl_unread_notifications }}</span>
+          {% endif %}
+        </a>
+        {% endif %}
+        <button
+          type="button"
+          class="profile-trigger"
+          id="profileTrigger"
+          aria-label="Ouvrir le profil"
+        >
+          <span class="profile-trigger-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+          <span class="profile-trigger-label">Mon profil</span>
+          <span class="profile-trigger-caret">▾</span>
+        </button>
+      </div>
     </nav>
 
     <div class="profile-overlay" id="profileOverlay"></div>
     <aside class="profile-panel" id="profilePanel" aria-hidden="true">
-        <div class="profile-panel-header">
-            <h3>Mon Profil</h3>
-            <button type="button" class="profile-panel-close" id="profileClose" aria-label="Fermer">&times;</button>
-        </div>
-        <div class="profile-panel-body">
-            <div class="profile-panel-avatar">
-                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
-            </div>
-            <h4 class="profile-panel-name">{{ user.first_name }} {{ user.last_name }}</h4>
-            <span class="badge {{ user.role|lower }} profile-panel-role">{{ user.get_role_display }}</span>
+      <div class="profile-panel-header">
+        <h3>Mon Profil</h3>
+        <button
+          type="button"
+          class="profile-panel-close"
+          id="profileClose"
+          aria-label="Fermer"
+        >
+          &times;
+        </button>
+      </div>
+      <div class="profile-panel-body">
+        <div class="profile-panel-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+        <h4 class="profile-panel-name">
+          {{ user.first_name }} {{ user.last_name }}
+        </h4>
+        <span class="badge {{ user.role|lower }} profile-panel-role"
+          >{{ user.get_role_display }}</span
+        >
 
-            <dl class="profile-panel-info">
-                <div class="profile-info-row">
-                    <dt>Matricule</dt>
-                    <dd>{{ user.matricule|default:"—" }}</dd>
-                </div>
-                <div class="profile-info-row">
-                    <dt>Email</dt>
-                    <dd>{{ user.email|default:"—" }}</dd>
-                </div>
-                <div class="profile-info-row">
-                    <dt>Département</dt>
-                    <dd>{{ user.departement|default:"—" }}</dd>
-                </div>
-                <div class="profile-info-row">
-                    <dt>Téléphone</dt>
-                    <dd>{{ user.telephone|default:"—" }}</dd>
-                </div>
-                <div class="profile-info-row">
-                    <dt>Statut</dt>
-                    <dd>
-                        {% if user.is_active %}
-                            <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #6ee7b7;">Actif</span>
-                        {% else %}
-                            <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">Inactif</span>
-                        {% endif %}
-                    </dd>
-                </div>
-            </dl>
+        <dl class="profile-panel-info">
+          <div class="profile-info-row">
+            <dt>Matricule</dt>
+            <dd>{{ user.matricule|default:"—" }}</dd>
+          </div>
+          <div class="profile-info-row">
+            <dt>Email</dt>
+            <dd>{{ user.email|default:"—" }}</dd>
+          </div>
+          <div class="profile-info-row">
+            <dt>Département</dt>
+            <dd>{{ user.departement|default:"—" }}</dd>
+          </div>
+          <div class="profile-info-row">
+            <dt>Téléphone</dt>
+            <dd>{{ user.telephone|default:"—" }}</dd>
+          </div>
+          <div class="profile-info-row">
+            <dt>Statut</dt>
+            <dd>
+              {% if user.is_active %}
+              <span
+                class="badge"
+                style="background: rgba(16, 185, 129, 0.15); color: #6ee7b7"
+                >Actif</span
+              >
+              {% else %}
+              <span
+                class="badge"
+                style="background: rgba(239, 68, 68, 0.15); color: #fca5a5"
+                >Inactif</span
+              >
+              {% endif %}
+            </dd>
+          </div>
+        </dl>
 
-            {% if user.role != 'ADMIN' %}
-            <a href="{% url 'profile' %}" class="btn profile-panel-edit">Modifier mon profil</a>
-            {% endif %}
-        </div>
-        <div class="profile-panel-footer">
-            <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn danger" style="width: 100%; justify-content: center;">Déconnexion</button>
-            </form>
-        </div>
+        {% if user.role != 'TECH' %}
+        <a href="{% url 'profile' %}" class="btn profile-panel-edit"
+          >Modifier mon profil</a
+        >
+        {% endif %}
+      </div>
+      <div class="profile-panel-footer">
+        <form action="{% url 'logout' %}" method="post">
+          {% csrf_token %}
+          <button
+            type="submit"
+            class="btn danger"
+            style="width: 100%; justify-content: center"
+          >
+            Déconnexion
+          </button>
+        </form>
+      </div>
     </aside>
     {% endif %}
 
-    <main class="main-content">
-        {% block content %}
-        {% endblock %}
-    </main>
-    
+    <main class="main-content">{% block content %} {% endblock %}</main>
+
     <div class="floating-notification-container" id="floatingNotificationContainer">
-        {% if messages %}
-            {% for message in messages %}
-            <div class="floating-notification {{ message.level_tag }}">
-                <div class="fn-header">
-                    <span class="fn-title">
-                        {% if message.level_tag == 'success' %}Succès
-                        {% elif message.level_tag == 'error' %}Erreur
-                        {% elif message.level_tag == 'warning' %}Attention
-                        {% elif message.level_tag == 'info' %}Information
-                        {% else %}Notification{% endif %}
-                    </span>
-                </div>
-                <div class="fn-body">{{ message|linebreaksbr }}</div>
-                <div class="fn-actions">
-                    <button type="button" class="btn-dismiss" onclick="this.closest('.floating-notification').remove()">Fermer</button>
-                </div>
+      {% if messages %} {% for message in messages %}
+      <div class="floating-notification {{ message.level_tag }}">
+        <div class="fn-row">
+          <div class="fn-icon" aria-hidden="true">●</div>
+          <div class="fn-main">
+            <div class="fn-header">
+              <span class="fn-title">
+                {% if message.level_tag == 'success' %}Succès
+                {% elif message.level_tag == 'error' %}Erreur
+                {% elif message.level_tag == 'warning' %}Attention
+                {% elif message.level_tag == 'info' %}Information
+                {% else %}Notification{% endif %}
+              </span>
+              <span class="fn-meta" aria-hidden="true"></span>
             </div>
-            {% endfor %}
-        {% endif %}
+            <div class="fn-body">{{ message|safe }}</div>
+          </div>
+          <div class="fn-actions">
+            <button type="button" class="btn-dismiss" aria-label="Fermer"
+              onclick="this.closest('.floating-notification').remove()">Fermer</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %} {% endif %}
     </div>
+
+    <!-- DISABLED: Confirmation modal (custom)
+    <div id="confirmModal" class="confirm-modal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="confirm-modal-backdrop" data-action="close"></div>
+      <div class="confirm-modal-panel" role="document">
+        <h3 id="confirmModalTitle">Confirmer l'action</h3>
+        <p id="confirmModalMessage">Êtes-vous sûr ?</p>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem">
+          <button type="button" class="btn" id="confirmCancel">Annuler</button>
+          <button type="button" class="btn danger" id="confirmOk">OK</button>
+        </div>
+      </div>
+    </div>
+    -->
 
     {% if user.is_authenticated %}
     <script>
-        (function () {
-            var trigger = document.getElementById('profileTrigger');
-            var panel = document.getElementById('profilePanel');
-            var overlay = document.getElementById('profileOverlay');
-            var closeBtn = document.getElementById('profileClose');
+      (function () {
+        var trigger = document.getElementById("profileTrigger");
+        var panel = document.getElementById("profilePanel");
+        var overlay = document.getElementById("profileOverlay");
+        var closeBtn = document.getElementById("profileClose");
 
-            function openPanel() {
-                panel.classList.add('open');
-                overlay.classList.add('open');
-                panel.setAttribute('aria-hidden', 'false');
-                document.body.style.overflow = 'hidden';
-            }
+        function openPanel() {
+          panel.classList.add("open");
+          overlay.classList.add("open");
+          panel.setAttribute("aria-hidden", "false");
+          document.body.style.overflow = "hidden";
+        }
 
-            function closePanel() {
-                panel.classList.remove('open');
-                overlay.classList.remove('open');
-                panel.setAttribute('aria-hidden', 'true');
-                document.body.style.overflow = '';
-            }
+        function closePanel() {
+          panel.classList.remove("open");
+          overlay.classList.remove("open");
+          panel.setAttribute("aria-hidden", "true");
+          document.body.style.overflow = "";
+        }
 
-            trigger.addEventListener('click', openPanel);
-            closeBtn.addEventListener('click', closePanel);
-            overlay.addEventListener('click', closePanel);
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') closePanel();
-            });
-        })();
+        trigger.addEventListener("click", openPanel);
+        closeBtn.addEventListener("click", closePanel);
+        overlay.addEventListener("click", closePanel);
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") closePanel();
+        });
+      })();
     </script>
     {% endif %}
     <script>
-        // Auto-remove notifications (plus long pour les avertissements/doublons)
-        document.addEventListener('DOMContentLoaded', () => {
-            const notifications = document.querySelectorAll('.floating-notification');
-            notifications.forEach(notif => {
-                const delay = notif.classList.contains('warning') || notif.classList.contains('error') ? 15000 : 8000;
-                setTimeout(() => {
-                    notif.style.opacity = '0';
-                    notif.style.transform = 'translateY(-20px) scale(0.95)';
-                    setTimeout(() => notif.remove(), 400);
-                }, delay);
-            });
+      // Auto-remove notifications (plus long pour les avertissements/doublons)
+      document.addEventListener("DOMContentLoaded", () => {
+        const notifications = document.querySelectorAll('.floating-notification');
+        // Enhance message rendering: extract actor and timestamp when present
+        notifications.forEach((notif) => {
+          const body = notif.querySelector('.fn-body');
+          const meta = notif.querySelector('.fn-meta');
+          if (!body || !meta) return;
+          const text = body.textContent || '';
+          // Pattern: "... supprimé par USER le YYYY-MM-DD HH:MM:SS"
+          const m = text.match(/par\s+(.+?)\s+le\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/i);
+          if (m) {
+            const actor = m[1].trim();
+            const ts = m[2].trim();
+            meta.textContent = `${actor} — ${ts}`;
+            // Remove the trailing "par ... le ..." from body for clarity
+            body.innerHTML = body.innerHTML.replace(m[0], '').trim();
+          } else {
+            // Try error pattern: ": N contrat(s)"
+            const m2 = text.match(/:\s*(\d+)\s+contrat/);
+            if (m2) {
+              meta.textContent = `${m2[1]} contrat(s)`;
+            }
+          }
+
+          // Add icon per level
+          const iconEl = notif.querySelector('.fn-icon');
+          const level = notif.classList.contains('success') ? 'success' :
+                        notif.classList.contains('error') ? 'error' :
+                        notif.classList.contains('warning') ? 'warning' : 'info';
+          const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+          iconEl.textContent = icons[level] || '●';
         });
+
+        notifications.forEach((notif) => {
+          const delay =
+            notif.classList.contains("warning") ||
+            notif.classList.contains("error")
+              ? 15000
+              : 8000;
+          setTimeout(() => {
+            notif.style.opacity = "0";
+            notif.style.transform = "translateY(-20px) scale(0.95)";
+            setTimeout(() => notif.remove(), 400);
+          }, delay);
+        });
+      });
     </script>
-</body>
+    <script>
+      // Undo handler for notifications (delegated)
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest && e.target.closest('.btn-undo');
+        if (!btn) return;
+        e.preventDefault();
+        const url = btn.getAttribute('data-undo-url');
+        if (!url) return;
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          body: JSON.stringify({}),
+        }).then((resp) => {
+          if (resp.ok) {
+            // show immediate feedback
+            const notif = btn.closest('.floating-notification');
+            if (notif) {
+              notif.querySelector('.fn-title').textContent = 'Succès';
+              notif.querySelector('.fn-body').textContent = 'Action annulée.';
+              notif.classList.remove('error','warning');
+              notif.classList.add('success');
+              setTimeout(() => notif.remove(), 2500);
+            } else {
+              location.reload();
+            }
+          } else {
+            alert('Impossible d\'annuler l\'action.');
+          }
+        });
+      });
+    </script>
+    <!-- DISABLED: Custom confirmation modal system
+    <script>
+      // Custom confirmation modal for forms with .needs-confirm
+      document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('confirmModal');
+        const modalMsg = document.getElementById('confirmModalMessage');
+        const modalTitle = document.getElementById('confirmModalTitle');
+        const btnOk = document.getElementById('confirmOk');
+        const btnCancel = document.getElementById('confirmCancel');
+        const backdrop = modal.querySelector('.confirm-modal-backdrop');
+        let pendingForm = null;
+
+        function openModal(message) {
+          modalMsg.textContent = message || 'Confirmer ?';
+          modalTitle.textContent = 'Confirmation';
+          modal.setAttribute('aria-hidden', 'false');
+          modal.classList.add('open');
+        }
+
+        function closeModal() {
+          modal.setAttribute('aria-hidden', 'true');
+          modal.classList.remove('open');
+          pendingForm = null;
+        }
+
+        document.addEventListener('submit', (e) => {
+          const form = e.target;
+          if (!form.classList.contains('needs-confirm')) return;
+          e.preventDefault();
+          const msg = form.getAttribute('data-confirm-message') || 'Confirmer ?';
+          pendingForm = form;
+          openModal(msg);
+        });
+
+        btnOk.addEventListener('click', () => {
+          if (!pendingForm) return closeModal();
+          // submit the form programmatically
+          pendingForm.submit();
+          closeModal();
+        });
+
+        btnCancel.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+      });
+    </script>
+    -->
+    <script>
+      // Dropdown Contracts: toggle on click, close on outside click
+      document.addEventListener("DOMContentLoaded", () => {
+        const dropdownTrigger = document.getElementById("contractsDropdownLink");
+        const toggle = document.getElementById("contractsDropdownToggleBtn");
+        const menu = document.getElementById("contractsDropdownMenu");
+        const container = document.getElementById("contractsDropdown");
+        if (!dropdownTrigger || !toggle || !menu || !container) return;
+
+        function openMenu() {
+          container.classList.add("open");
+          dropdownTrigger.setAttribute("aria-expanded", "true");
+        }
+
+        function closeMenu() {
+          container.classList.remove("open");
+          dropdownTrigger.setAttribute("aria-expanded", "false");
+        }
+
+        dropdownTrigger.addEventListener("click", (e) => {
+          const expanded =
+            dropdownTrigger.getAttribute("aria-expanded") === "true";
+          if (expanded) {
+            closeMenu();
+          } else {
+            openMenu();
+          }
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!container.contains(e.target)) {
+            closeMenu();
+          }
+        });
+      });
+    </script>
+  </body>
 </html>

@@ -398,6 +398,53 @@ body {
     font-size: 0.9rem;
     font-weight: 600;
     white-space: nowrap;
+
+/* Floating notifications */
+.floating-notification-container {
+    position: fixed;
+    right: 1.5rem;
+    top: 80px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 420px;
+}
+.floating-notification {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--border);
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+    color: var(--text-main);
+    overflow: hidden;
+    transform-origin: top right;
+}
+.floating-notification .fn-row {
+    display:flex; gap:0.6rem; align-items:flex-start;
+}
+.floating-notification .fn-icon {
+    width:36px; height:36px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:16px;
+}
+.floating-notification .fn-main { flex:1; }
+.floating-notification .fn-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; }
+.floating-notification .fn-title { font-weight:700; font-size:0.95rem; }
+.floating-notification .fn-meta { font-size:0.78rem; color:var(--text-muted); }
+.floating-notification .fn-body { margin-top:0.45rem; color:var(--text-main); font-size:0.95rem; }
+.floating-notification .fn-actions { margin-left:8px; align-self:flex-start; }
+.floating-notification .btn-dismiss { background:none; border:1px solid rgba(255,255,255,0.06); color:var(--text-muted); padding:0.35rem 0.7rem; border-radius:0.45rem; cursor:pointer; }
+.floating-notification.success { border-left:4px solid var(--success); }
+.floating-notification.error { border-left:4px solid var(--danger); }
+.floating-notification.warning { border-left:4px solid #f59e0b; }
+.floating-notification.info { border-left:4px solid var(--accent); }
+
+/* Confirmation modal styles */
+.confirm-modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:10050; }
+.confirm-modal.open { display:flex; }
+.confirm-modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.5); }
+.confirm-modal-panel { position:relative; background:var(--bg-card); padding:1.25rem; border-radius:12px; border:1px solid var(--border); width:100%; max-width:520px; box-shadow:0 24px 60px rgba(2,6,23,0.6); }
+.confirm-modal-panel h3 { margin:0 0 0.5rem 0; font-size:1.05rem; }
+.confirm-modal-panel p { margin:0; color:var(--text-muted); }
 }
 
 .profile-trigger-caret {
@@ -496,6 +543,7 @@ tr:hover td {
     font-weight: 600;
 }
 .badge.admin { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+.badge.admin_sys { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; }
 .badge.tech { background: rgba(59, 130, 246, 0.15); color: #93c5fd; }
 .badge.membre { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
 

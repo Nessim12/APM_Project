@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User
+from .models import SupportMessage, User
 
 class CustomUserAdmin(UserAdmin):
     list_display = ('matricule', 'username', 'email', 'nom_complet', 'role', 'departement', 'telephone', 'is_active', 'is_staff')
@@ -17,3 +17,10 @@ class CustomUserAdmin(UserAdmin):
     nom_complet.short_description = 'Nom Complet'
 
 admin.site.register(User, CustomUserAdmin)
+
+
+@admin.register(SupportMessage)
+class SupportMessageAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'sender', 'lue', 'created_at')
+    list_filter = ('lue', 'created_at')
+    search_fields = ('subject', 'message', 'sender__email', 'sender__matricule')
