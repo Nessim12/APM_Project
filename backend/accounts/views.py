@@ -1,6 +1,8 @@
 import secrets
 import string
+import random
 import openpyxl
+import threading
 
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
@@ -62,17 +64,55 @@ Nous vous recommandons de changer votre mot de passe dès votre première connex
 Cordialement,
 L'équipe APM Project
 """
+    def _send():
+        try:
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
+        except Exception as e:
+            print(f"[EMAIL ERROR] Could not send email to {user.email}: {e}")
+            
+    threading.Thread(target=_send).start()
+
+
+import urllib.request
+import urllib.parse
+import json
+
+# ─── CAPTCHA helper ────────────────────────────────────────────────────────────────
+
+def verify_recaptcha(response_token):
+    secret = '6LcVnUwtAAAAABnHcwmDInX9u0UNfMhcZ4jkup1z'
+    url = 'https://www.google.com/recaptcha/api/siteverify'
+    data = urllib.parse.urlencode({
+        'secret': secret,
+        'response': response_token
+    }).encode('utf-8')
     try:
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
-    except Exception as e:
-        print(f"[EMAIL ERROR] Could not send email to {user.email}: {e}")
+        req = urllib.request.Request(url, data=data)
+        with urllib.request.urlopen(req) as response:
+            result = json.loads(response.read().decode())
+            return result.get('success', False)
+    except Exception:
+        return False
 
 
-# ─── Login (redirect by role) ──────────────────────────────────────────────────
+# ─── Login (redirect by role) ──────────────────────────────────────────────────────
 
 class CustomLoginView(LoginView):
     template_name = 'accounts/login.html'
     redirect_authenticated_user = True
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # Validate Google reCAPTCHA
+        recaptcha_response = request.POST.get('g-recaptcha-response')
+        if not recaptcha_response or not verify_recaptcha(recaptcha_response):
+            context = self.get_context_data()
+            context['auth_error_message'] = "Veuillez valider le CAPTCHA pour continuer."
+            return self.render_to_response(context)
+
+        return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -80,7 +120,8 @@ class CustomLoginView(LoginView):
         if reason == 'inactive':
             context['auth_error_message'] = "Votre compte n'est pas activé. Veuillez contacter l'administrateur."
         elif self.request.method == 'POST' and self.request.user.is_anonymous:
-            context['auth_error_message'] = "Identifiant ou mot de passe incorrect."
+            if 'auth_error_message' not in context:
+                context['auth_error_message'] = "Identifiant ou mot de passe incorrect."
         return context
 
     def get_success_url(self):

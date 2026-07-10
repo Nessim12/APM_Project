@@ -4,6 +4,21 @@ from django.core.exceptions import ValidationError
 from .models import User
 
 
+# ─── Département Choices ───────────────────────────────────────────────────────
+
+DEPARTEMENT_CHOICES = [
+    ('', '— Sélectionner un département —'),
+    ('Commercial & Marketing', 'Commercial & Marketing'),
+    ('Informatique (IT)', 'Informatique (IT)'),
+    ('Service Client', 'Service Client'),
+    ('Finance & Facturation', 'Finance & Facturation'),
+    ('Ressources Humaines', 'Ressources Humaines'),
+    ('Direction Générale', 'Direction Générale'),
+    ('Technique & Réseau', 'Technique & Réseau'),
+    ('Autre', 'Autre'),
+]
+
+
 # ─── Validators ────────────────────────────────────────────────────────────────
 
 def validate_telephone(value):
@@ -25,7 +40,7 @@ class UserForm(forms.ModelForm):
             'last_name':   forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Nom'}),
             'email':       forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'exemple@email.com'}),
             'telephone':   forms.TextInput(attrs={'class': 'form-input', 'placeholder': '+216 XX XXX XXX'}),
-            'departement': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Département'}),
+            'departement': forms.Select(choices=DEPARTEMENT_CHOICES, attrs={'class': 'form-select'}),
             'role':        forms.Select(attrs={'class': 'form-select'}),
         }
 
@@ -84,7 +99,7 @@ class ProfileForm(forms.ModelForm):
             'last_name':   forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Nom'}),
             'email':       forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'exemple@email.com'}),
             'telephone':   forms.TextInput(attrs={'class': 'form-input', 'placeholder': '+216 XX XXX XXX'}),
-            'departement': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Département'}),
+            'departement': forms.Select(choices=DEPARTEMENT_CHOICES, attrs={'class': 'form-select'}),
         }
 
     def clean_email(self):

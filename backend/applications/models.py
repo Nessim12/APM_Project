@@ -88,7 +88,7 @@ class Application(models.Model):
         help_text=_("Indique si l'application nécessite un certificat SSL."),
     )
 
-    # Gouvernance humaine — 4 rôles pivots obligatoires
+    # Gouvernance humaine — Responsable métier obligatoire, autres optionnels
     responsable_metier = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -100,18 +100,21 @@ class Application(models.Model):
         on_delete=models.PROTECT,
         related_name='applications_technique',
         verbose_name=_('Responsable technique'),
+        null=True, blank=True,
     )
     chef_de_projet = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name='applications_chef_projet',
         verbose_name=_('Chef de projet'),
+        null=True, blank=True,
     )
     equipe_support = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name='applications_support',
         verbose_name=_('Équipe support'),
+        null=True, blank=True,
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

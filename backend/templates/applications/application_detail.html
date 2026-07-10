@@ -103,24 +103,12 @@
 
     <div class="glass-card">
         <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
-            Gouvernance — Responsables
+            Gouvernance — Responsable
         </h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
             <div>
                 <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Responsable métier</div>
                 <div>{{ application.responsable_metier.get_full_name }} <span style="color: var(--text-muted);">({{ application.responsable_metier.matricule }})</span></div>
-            </div>
-            <div>
-                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Responsable technique</div>
-                <div>{{ application.responsable_technique.get_full_name }} <span style="color: var(--text-muted);">({{ application.responsable_technique.matricule }})</span></div>
-            </div>
-            <div>
-                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Chef de projet</div>
-                <div>{{ application.chef_de_projet.get_full_name }} <span style="color: var(--text-muted);">({{ application.chef_de_projet.matricule }})</span></div>
-            </div>
-            <div>
-                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Équipe support</div>
-                <div>{{ application.equipe_support.get_full_name }} <span style="color: var(--text-muted);">({{ application.equipe_support.matricule }})</span></div>
             </div>
         </div>
     </div>

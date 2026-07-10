@@ -153,6 +153,12 @@
                     </div>
                 </div>
 
+                <!-- CAPTCHA -->
+                <div class="login-field" style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+                    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                    <div class="g-recaptcha" data-sitekey="6LcVnUwtAAAAAE9unRyqH5cKHTFpfYOrHjcP3vF8"></div>
+                </div>
+
                 <!-- Submit -->
                 <button type="submit" class="login-submit-btn" id="loginSubmit">
                     <span class="lsb-text">Se connecter</span>
@@ -195,7 +201,7 @@
         align-items: center;
         justify-content: center;
         overflow: hidden;
-        background: linear-gradient(145deg, #071022 0%, #0c1d3d 45%, #0f2248 100%);
+        background: var(--bg-body); /* Adapt to light/dark mode */
         padding: 3.5rem 3rem;
     }
 
@@ -261,16 +267,12 @@
         font-weight: 800;
         letter-spacing: -.02em;
         margin: 0;
-        background: linear-gradient(100deg, #FFFFFF 10%, #90b8f8 45%, #F2A93C 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        filter: drop-shadow(0 2px 12px rgba(242,169,60,.25));
+        color: var(--text-main);
     }
 
     /* Brand subtitle */
     .login-brand-subtitle {
-        color: rgba(200,215,235,.65);
+        color: var(--text-muted);
         font-size: .93rem;
         line-height: 1.75;
         margin: 0;
@@ -284,18 +286,18 @@
         justify-content: center;
     }
     .login-chip {
-        background: rgba(255,255,255,.05);
-        border: 1px solid rgba(255,255,255,.10);
+        background: var(--bg-card);
+        border: 1px solid var(--border);
         border-radius: 999px;
         padding: .38rem .9rem;
         font-size: .78rem;
-        color: rgba(220,232,248,.8);
+        color: var(--text-muted);
         backdrop-filter: blur(6px);
         transition: background .2s, border-color .2s, transform .2s;
     }
     .login-chip:hover {
-        background: rgba(232,130,58,.15);
-        border-color: rgba(242,169,60,.35);
+        background: rgba(232,130,58,.10);
+        border-color: var(--accent);
         transform: translateY(-2px);
     }
 
@@ -308,23 +310,20 @@
         align-items: center;
         justify-content: center;
         padding: 3rem 2.5rem;
-        background: rgba(8, 14, 28, .60);
+        background: var(--bg-body);
         backdrop-filter: blur(20px);
-        border-left: 1px solid rgba(255,255,255,.06);
+        border-left: 1px solid var(--border);
     }
 
     /* Card */
     .login-form-card {
         width: 100%;
         max-width: 420px;
-        background: rgba(12, 20, 42, .80);
-        border: 1px solid rgba(255,255,255,.08);
+        background: var(--bg-card);
+        border: 1px solid var(--border);
         border-radius: 1.4rem;
         padding: 2.5rem 2.25rem;
-        box-shadow:
-            0 0 0 1px rgba(255,255,255,.04) inset,
-            0 28px 70px rgba(0,0,0,.50),
-            0 0 50px rgba(29,79,168,.08);
+        box-shadow: var(--card-shadow);
     }
 
     /* Header */
@@ -334,7 +333,7 @@
         gap: .9rem;
         margin-bottom: 2rem;
         padding-bottom: 1.5rem;
-        border-bottom: 1px solid rgba(255,255,255,.07);
+        border-bottom: 1px solid var(--border);
     }
     .login-lock-icon {
         width: 50px; height: 50px;
@@ -347,14 +346,14 @@
         box-shadow: 0 6px 20px rgba(232,130,58,.30);
     }
     .login-form-title {
-        font-size: 1.35rem;
+        font-size: 1.55rem;
         font-weight: 700;
         margin: 0 0 .2rem 0;
-        color: #ffffff;
+        color: var(--text-main);
     }
     .login-form-subtitle {
         font-size: .88rem;
-        color: rgba(220,230,245,.65);
+        color: var(--text-muted);
         margin: 0;
     }
 
@@ -382,7 +381,7 @@
     .login-label {
         font-size: .76rem;
         font-weight: 600;
-        color: rgba(148,163,184,.85);
+        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: .07em;
     }
@@ -413,20 +412,20 @@
 
     .login-input {
         width: 100%;
-        background: rgba(255,255,255,.04);
-        border: 1px solid rgba(255,255,255,.09);
-        color: #f1f5f9;
+        background: var(--bg-body);
+        border: 1px solid var(--border);
+        color: var(--text-main);
         padding: .9rem 2.9rem .9rem 2.75rem;
         border-radius: .72rem;
         font-size: .92rem;
         font-family: inherit;
         transition: border-color .22s, background .22s, box-shadow .22s;
     }
-    .login-input::placeholder { color: #2d3f55; }
+    .login-input::placeholder { color: var(--text-muted); }
     .login-input:focus {
         outline: none;
-        border-color: rgba(232,130,58,.55);
-        background: rgba(232,130,58,.05);
+        border-color: var(--accent);
+        background: var(--bg-body);
         box-shadow: 0 0 0 3px rgba(232,130,58,.12);
     }
 
@@ -436,14 +435,14 @@
         right: .85rem;
         background: none;
         border: none;
-        color: #334155;
+        color: var(--text-muted);
         cursor: pointer;
         padding: .25rem;
         display: flex;
         align-items: center;
         transition: color .2s;
     }
-    .login-eye-btn:hover { color: #94a3b8; }
+    .login-eye-btn:hover { color: var(--text-main); }
 
     /* Submit */
     .login-submit-btn {
@@ -496,6 +495,33 @@
         font-size: .72rem;
         line-height: 1.75;
         color: rgba(148,163,184,.5);
+    }
+
+    /* CAPTCHA */
+    .login-captcha-wrap {
+        display: flex;
+        gap: .65rem;
+        align-items: stretch;
+    }
+    .login-captcha-question {
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+        background: rgba(29, 79, 168, 0.12);
+        border: 1px solid rgba(29, 79, 168, 0.3);
+        border-radius: .72rem;
+        padding: .9rem 1rem;
+        flex-shrink: 0;
+        min-width: 130px;
+        justify-content: center;
+    }
+    .captcha-icon { font-size: 1rem; }
+    .captcha-text {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #E8823A;
+        letter-spacing: .04em;
+        font-family: monospace;
     }
 
     /* ══════════════════════════

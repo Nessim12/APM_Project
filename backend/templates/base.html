@@ -397,7 +397,7 @@
                 href="{% url 'contrats:contrat_dashboard' %}"
                 class="nav-dropdown-item"
                 role="menuitem"
-                ><span class="nav-item-icon">📄</span><span>Contrat</span></a
+                ><span class="nav-item-icon">📄</span><span>Contrats</span></a
               >
               <a
                 href="{% url 'contrats:fournisseur_list' %}"
@@ -408,6 +408,21 @@
             </div>
           </details>
         </li>
+        {% endif %}
+
+        {% if user.role in 'ADMIN,ADMIN_SYS' %}
+        <li>
+          <a href="{% url 'dashboard' %}" class="nav-item">Utilisateurs</a>
+        </li>
+        <li>
+          <a href="{% url 'application_list' %}" class="nav-item">Applications</a>
+        </li>
+        <li>
+          <a href="{% url 'ssl_list' %}" class="nav-item">SSL</a>
+        </li>
+        {% endif %}
+
+        {% if user.role != 'ADMIN' %}
         <li>
           <a href="{% url 'document_list' %}" class="nav-item">Documentation</a>
         </li>
