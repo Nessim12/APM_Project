@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.contract_dashboard, name='contrat_dashboard'),
     path('fournisseurs/', views.fournisseur_list, name='fournisseur_list'),
     path('fournisseurs/add/', views.fournisseur_create, name='fournisseur_create'),
+    path('fournisseurs/<int:pk>/', views.fournisseur_detail, name='fournisseur_detail'),
     path('fournisseurs/<int:pk>/edit/', views.fournisseur_update, name='fournisseur_update'),
     path('fournisseurs/<int:pk>/delete/', views.fournisseur_delete, name='fournisseur_delete'),
     path('types/<str:contract_type>/', views.contract_type_list, name='contrat_type_list'),

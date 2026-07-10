@@ -385,3 +385,28 @@ def undo_contract(request, pk):
     contract.restore()
     messages.success(request, f'Annulation : contrat « {contract.numero_contrat} » restauré.')
     return redirect('contrats:contrat_type_list', contract_type=contract.contract_type)
+
+
+@login_required
+def fournisseur_detail(request, pk):
+    fournisseur = get_object_or_404(
+        Fournisseur.objects.filter(archived=False),
+        pk=pk
+    )
+    # Fetch all active contracts associated with this provider
+    contrats = fournisseur.contrats.filter(archived=False).select_related('application')
+    
+    # Calculate quick stats for this provider
+    total_contrats = contrats.count()
+    cout_total = contrats.aggregate(total=Sum('cout_annuel'))['total'] or 0
+    contrats_actifs = contrats.filter(statut=Contract.StatutChoices.ACTIF).count()
+    contrats_expires = contrats.filter(statut=Contract.StatutChoices.EXPIRE).count()
+    
+    return render(request, 'contrats/fournisseur_detail.html', {
+        'fournisseur': fournisseur,
+        'contrats': contrats,
+        'total_contrats': total_contrats,
+        'cout_total': cout_total,
+        'contrats_actifs': contrats_actifs,
+        'contrats_expires': contrats_expires,
+    })

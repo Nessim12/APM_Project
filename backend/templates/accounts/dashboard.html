@@ -19,53 +19,275 @@
 </div>
 
 {% if not can_manage_users %}
-<div class="glass-card" style="margin-bottom: 2rem;">
-    <h3 style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">Accès rapide</h3>
-    <div class="doc-grid doc-grid-compact">
-        <article class="doc-card glass-card">
-            <div class="doc-card-body">
-                <h3 class="doc-card-title"><a href="{% url 'application_list' %}">Gestion des applications</a></h3>
-                <p class="doc-card-desc">Consulter les applications et leurs métadonnées.</p>
+<!-- Hero Section -->
+<div class="glass-card hero-card" style="margin-bottom: 2rem; padding: 2.5rem 3rem; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2rem;">
+    <div class="hero-blob hero-blob-orange"></div>
+    <div class="hero-blob hero-blob-blue"></div>
+    
+    <div style="position: relative; z-index: 1;">
+        <h2 class="hero-greeting">
+            Bonjour, {{ user.first_name }} 👋
+        </h2>
+        <p style="margin: 0; color: var(--text-muted); font-size: 1.05rem; max-width: 500px; line-height: 1.6;">
+            Bienvenue sur votre espace de gestion centralisée. Accédez rapidement à vos outils et supervisez votre infrastructure technique en temps réel.
+        </p>
+    </div>
+    
+    <div style="position: relative; z-index: 1; display: flex; gap: 1rem;">
+        <div class="hero-role-badge">
+            <div class="hero-role-label">Rôle Actuel</div>
+            <div class="hero-role-value">
+                <span class="hero-role-dot"></span>
+                {{ user.get_role_display }}
             </div>
-        </article>
-        <article class="doc-card glass-card">
-            <div class="doc-card-body">
-                <h3 class="doc-card-title"><a href="{% url 'environment_list' %}">Gestion des environnements</a></h3>
-                <p class="doc-card-desc">Accès aux environnements et serveurs.</p>
-            </div>
-        </article>
-        <article class="doc-card glass-card">
-            <div class="doc-card-body">
-                <h3 class="doc-card-title"><a href="{% url 'ssl_list' %}">Gestion SSL</a></h3>
-                <p class="doc-card-desc">Suivi des certificats SSL et alertes.</p>
-            </div>
-        </article>
-        <article class="doc-card glass-card">
-            <div class="doc-card-body">
-                <h3 class="doc-card-title"><a href="{% url 'domaine_list' %}">Gestion des domaines</a></h3>
-                <p class="doc-card-desc">Voir et gérer les domaines rattachés.</p>
-            </div>
-        </article>
-        <article class="doc-card glass-card">
-            <div class="doc-card-body">
-                <h3 class="doc-card-title"><a href="{% url 'document_list' %}">Documentation</a></h3>
-                <p class="doc-card-desc">Parcourir et téléverser les documents.</p>
-            </div>
-        </article>
-        <article class="doc-card glass-card">
-            <div class="doc-card-body">
-                <h3 class="doc-card-title"><a href="{% url 'contrats:contrat_dashboard' %}">Contrats</a></h3>
-                <p class="doc-card-desc">Accéder au tableau de bord des contrats.</p>
-            </div>
-        </article>
+        </div>
     </div>
 </div>
+
+<!-- Modules Grid -->
+<div style="margin-bottom: 2.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+        <h3 class="section-title">Modules Principaux</h3>
+        <span style="color: var(--text-muted); font-size: 0.85rem;">Plateforme APM</span>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+        
+        <!-- Application Card -->
+        <a href="{% url 'application_list' %}" class="module-card">
+            <div class="module-card-icon" style="background: rgba(232, 130, 58, 0.15); border-color: rgba(232, 130, 58, 0.3);">
+                <span style="font-size: 2.2rem;">🖥️</span>
+            </div>
+            <div class="module-card-content">
+                <h3>Gestion des applications</h3>
+                <p>Consultez le référentiel des applications métier, gérez les dépendances, et maintenez à jour les métadonnées de l'entreprise.</p>
+                <div class="module-card-footer">
+                    <span class="module-card-link orange">Ouvrir le module &rarr;</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Environment Card -->
+        <a href="{% url 'environment_list' %}" class="module-card">
+            <div class="module-card-icon" style="background: rgba(29, 79, 168, 0.2); border-color: rgba(29, 79, 168, 0.35);">
+                <span style="font-size: 2.2rem;">⚙️</span>
+            </div>
+            <div class="module-card-content">
+                <h3>Gestion des environnements</h3>
+                <p>Pilotez l'ensemble de vos serveurs (PROD, PREPROD, TEST), surveillez l'état de l'infrastructure et gérez les instances logicielles.</p>
+                <div class="module-card-footer">
+                    <span class="module-card-link blue">Ouvrir le module &rarr;</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- SSL Card -->
+        <a href="{% url 'ssl_list' %}" class="module-card">
+            <div class="module-card-icon" style="background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.3);">
+                <span style="font-size: 2.2rem;">🔒</span>
+            </div>
+            <div class="module-card-content">
+                <h3>Gestion SSL</h3>
+                <p>Surveillez la validité de vos certificats de sécurité SSL/TLS, anticipez les expirations et gérez les renouvellements.</p>
+                <div class="module-card-footer">
+                    <span class="module-card-link green">Ouvrir le module &rarr;</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Domaines Card -->
+        <a href="{% url 'domaine_list' %}" class="module-card">
+            <div class="module-card-icon" style="background: rgba(144, 184, 248, 0.15); border-color: rgba(144, 184, 248, 0.3);">
+                <span style="font-size: 2.2rem;">🌐</span>
+            </div>
+            <div class="module-card-content">
+                <h3>Gestion des domaines</h3>
+                <p>Administrez vos noms de domaines externes et internes, supervisez les zones DNS et sécurisez votre présence en ligne.</p>
+                <div class="module-card-footer">
+                    <span class="module-card-link lightblue">Ouvrir le module &rarr;</span>
+                </div>
+            </div>
+        </a>
+
+    </div>
+</div>
+
+<style>
+    /* ── Hero Card ── */
+    .hero-blob {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .hero-blob-orange {
+        top: -50px; right: -50px;
+        width: 250px; height: 250px;
+        background: radial-gradient(circle, rgba(232, 130, 58, 0.15) 0%, transparent 70%);
+    }
+    .hero-blob-blue {
+        bottom: -50px; left: 10%;
+        width: 200px; height: 200px;
+        background: radial-gradient(circle, rgba(29, 79, 168, 0.2) 0%, transparent 70%);
+    }
+    .hero-greeting {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-main);
+        font-weight: 800;
+        font-size: 2rem;
+        letter-spacing: -0.02em;
+    }
+    .hero-role-badge {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        backdrop-filter: blur(8px);
+    }
+    .hero-role-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+    }
+    .hero-role-value {
+        color: var(--text-main);
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .hero-role-dot {
+        display: inline-block;
+        width: 8px; height: 8px;
+        background: #4ade80;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(74,222,128,0.5);
+        flex-shrink: 0;
+    }
+
+    /* ── Section Title ── */
+    .section-title {
+        margin: 0;
+        color: var(--text-main);
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    /* ── Module Cards ── */
+    .module-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border);
+        border-radius: 1.25rem;
+        padding: 2rem;
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-start;
+        text-decoration: none;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .module-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, var(--border-light) 0%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .module-card:hover {
+        transform: translateY(-5px) scale(1.01);
+        border-color: var(--orange);
+        box-shadow: 
+            0 0 0 1px var(--border-light) inset,
+            0 32px 70px rgba(232, 130, 58, 0.12),
+            0 10px 30px var(--border-blue);
+    }
+    
+    .module-card:hover::before {
+        opacity: 1;
+    }
+
+    .module-card-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 18px;
+        border: 1px solid transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .module-card-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .module-card-content h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-main);
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+    }
+
+    .module-card-content p {
+        margin: 0 0 1.5rem 0;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        flex: 1;
+    }
+
+    .module-card-footer {
+        display: flex;
+        align-items: center;
+        opacity: 0.8;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    
+    .module-card:hover .module-card-footer {
+        opacity: 1;
+        transform: translateX(4px);
+    }
+
+    .module-card-link {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    .module-card-link.orange    { color: #E8823A; }
+    .module-card-link.blue      { color: var(--blue); }
+    .module-card-link.green     { color: #22c55e; }
+    .module-card-link.lightblue { color: var(--blue-light); }
+    
+    @media (max-width: 768px) {
+        .module-card {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .module-card-icon {
+            width: 56px;
+            height: 56px;
+        }
+    }
+</style>
 {% endif %}
 
 {% if can_manage_users %}
 <div class="glass-card" style="margin-bottom: 2rem;">
     <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
-        Recherche & Filtres
+        Recherche &amp; Filtres
     </h3>
     <form method="get" action="{% url 'dashboard' %}">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
@@ -83,7 +305,7 @@
             </div>
             <div style="display: flex; gap: 0.5rem;">
                 <button type="submit" class="btn" style="flex: 1; justify-content: center;">Filtrer</button>
-                <a href="{% url 'dashboard' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">Réinitialiser</a>
+                <a href="{% url 'dashboard' %}" class="btn btn-ghost" style="flex: 1; justify-content: center;">Réinitialiser</a>
             </div>
         </div>
     </form>
@@ -135,7 +357,7 @@
         <tbody>
             {% for u in users %}
             <tr>
-                <td><span style="font-family: monospace; color: #93c5fd;">{{ u.matricule }}</span></td>
+                <td><span class="mono-code">{{ u.matricule }}</span></td>
                 <td>{{ u.first_name }} {{ u.last_name }}</td>
                 <td>{{ u.email }}</td>
                 <td>{{ u.departement|default:"-" }}</td>
@@ -144,21 +366,21 @@
                 </td>
                 <td>
                     {% if u.is_active %}
-                        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #6ee7b7;">Actif</span>
+                        <span class="badge badge-active">Actif</span>
                     {% else %}
-                        <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">Inactif</span>
+                        <span class="badge badge-inactive">Inactif</span>
                     {% endif %}
                 </td>
                 <td>
                     {% if can_manage_users %}
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <a href="{% url 'user_update' u.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Modifier</a>
+                        <a href="{% url 'user_update' u.pk %}" class="btn btn-sm">Modifier</a>
                         <form action="{% url 'user_toggle_active' u.pk %}" method="post" style="display:inline;">
                             {% csrf_token %}
                             {% if u.is_active %}
-                                <button type="submit" class="btn danger" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Désactiver</button>
+                                <button type="submit" class="btn danger btn-sm">Désactiver</button>
                             {% else %}
-                                <button type="submit" class="btn success" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Activer</button>
+                                <button type="submit" class="btn success btn-sm">Activer</button>
                             {% endif %}
                         </form>
                     </div>
@@ -178,4 +400,30 @@
     {% include 'pagination.html' %}
 </div>
 {% endif %}
+
+<style>
+    .mono-code {
+        font-family: monospace;
+        color: var(--blue-light);
+    }
+    [data-theme="light"] .mono-code {
+        color: var(--blue);
+    }
+    .badge-active {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    [data-theme="dark"] .badge-active {
+        color: #6ee7b7;
+    }
+    .badge-inactive {
+        background: rgba(239, 68, 68, 0.12);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.22);
+    }
+    [data-theme="dark"] .badge-inactive {
+        color: #fca5a5;
+    }
+</style>
 {% endblock %}
