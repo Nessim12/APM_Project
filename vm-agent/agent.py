@@ -7,8 +7,9 @@ import requests
 import platform
 
 # Configuration
-API_BASE_URL = os.environ.get('API_BASE_URL', 'http://127.0.0.1:8000/api/vm')
+API_BASE_URL = os.environ.get('API_BASE_URL', 'http://192.168.1.15:8000/api/vm')
 INTERVAL = 30  # seconds
+
 
 def get_system_info():
     """Gathers system information for registration."""
