@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     'certificats_ssl',
     'documentation',
     'contrats',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'monitoring',
 ]
 
 MIDDLEWARE = [
