@@ -80,7 +80,8 @@ import json
 # ─── CAPTCHA helper ────────────────────────────────────────────────────────────────
 
 def verify_recaptcha(response_token):
-    secret = '6LcVnUwtAAAAABnHcwmDInX9u0UNfMhcZ4jkup1z'
+    # Remplacement par la clé secrète de test globale
+    secret = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
     url = 'https://www.google.com/recaptcha/api/siteverify'
     data = urllib.parse.urlencode({
         'secret': secret,
@@ -93,7 +94,6 @@ def verify_recaptcha(response_token):
             return result.get('success', False)
     except Exception:
         return False
-
 
 # ─── Login (redirect by role) ──────────────────────────────────────────────────────
 
