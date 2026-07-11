@@ -16,11 +16,10 @@ from .models import CertificatSSL, NotificationAdmin
 
 
 def is_admin(user):
-    return user.is_authenticated and user.role == User.RoleChoices.ADMIN
+    return user.is_authenticated and user.role != User.RoleChoices.TECH
 
 
 @login_required
-@user_passes_test(is_admin)
 def ssl_list(request):
     filter_form = CertificatSSLFilterForm(request.GET)
     certificats_list = CertificatSSL.objects.select_related('application').all()
@@ -84,7 +83,6 @@ def ssl_list(request):
 
 
 @login_required
-@user_passes_test(is_admin)
 def ssl_detail(request, pk):
     certificat = get_object_or_404(
         CertificatSSL.objects.select_related('application'),
@@ -94,7 +92,7 @@ def ssl_detail(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def ssl_create(request):
     application = None
     application_id = request.GET.get('application')
@@ -126,7 +124,7 @@ def ssl_create(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def ssl_update(request, pk):
     certificat = get_object_or_404(CertificatSSL, pk=pk)
 
@@ -160,7 +158,7 @@ def ssl_update(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def ssl_notifications(request):
     notifications = NotificationAdmin.objects.filter(
         destinataire=request.user,
@@ -174,7 +172,7 @@ def ssl_notifications(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 @require_POST
 def ssl_notification_mark_read(request, pk):
     notification = get_object_or_404(
@@ -189,7 +187,7 @@ def ssl_notification_mark_read(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 @require_POST
 def ssl_notifications_mark_all_read(request):
     updated = NotificationAdmin.objects.filter(

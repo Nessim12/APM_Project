@@ -20,7 +20,13 @@ class MatriculeOrEmailBackend(ModelBackend):
             or User.objects.filter(email__iexact=username).first()
         )
 
-        if user and user.check_password(password) and self.user_can_authenticate(user):
+        if user and user.check_password(password):
+            if not self.user_can_authenticate(user):
+                if request is not None:
+                    request.auth_failure_reason = 'inactive'
+                return None
+            if request is not None:
+                request.auth_failure_reason = 'invalid'
             return user
 
         return None

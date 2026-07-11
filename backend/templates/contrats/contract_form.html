@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Contrat — APM{% endblock %}
+{% block content %}
+<div class="page-centered" style="max-width: 800px;">
+  <div class="header-row">
+    <h1>{{ action }} un contrat</h1>
+    <a href="{% if contract %}{% url 'contrats:contract_detail' contract.pk %}{% else %}{% url 'contrats:contrat_dashboard' %}{% endif %}"
+       class="btn" style="background:transparent;border:1px solid var(--border)">← Retour</a>
+  </div>
+
+  <div class="glass-card">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <!-- Erreurs globales -->
+      {% if form.non_field_errors %}
+      <div class="alert error" style="margin-bottom:1.5rem">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Numéro de contrat -->
+      <div class="form-group">
+        <label>Numéro de contrat <span style="color:#C66A28">*</span></label>
+        {{ form.numero_contrat }}
+        {% if form.numero_contrat.errors %}
+        <ul class="errorlist">{% for e in form.numero_contrat.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <!-- Type + Statut -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div class="form-group">
+          <label>Type de contrat <span style="color:#C66A28">*</span></label>
+          {{ form.contract_type }}
+          {% if form.contract_type.errors %}
+          <ul class="errorlist">{% for e in form.contract_type.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label>Statut <span style="color:#C66A28">*</span></label>
+          {{ form.statut }}
+          <small style="color:var(--text-muted);font-size:0.8rem">
+            Le statut est recalculé automatiquement à l'enregistrement.
+          </small>
+          {% if form.statut.errors %}
+          <ul class="errorlist">{% for e in form.statut.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Dates -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div class="form-group">
+          <label>Date de début <span style="color:#C66A28">*</span></label>
+          {{ form.date_debut }}
+          {% if form.date_debut.errors %}
+          <ul class="errorlist">{% for e in form.date_debut.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label>Date de fin <span style="color:#C66A28">*</span></label>
+          {{ form.date_fin }}
+          {% if form.date_fin.errors %}
+          <ul class="errorlist">{% for e in form.date_fin.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Coût + SLA -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div class="form-group">
+          <label>Coût annuel (د.ج) <span style="color:#C66A28">*</span></label>
+          {{ form.cout_annuel }}
+          {% if form.cout_annuel.errors %}
+          <ul class="errorlist">{% for e in form.cout_annuel.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label>SLA <span style="color:#C66A28">*</span></label>
+          {{ form.sla }}
+          {% if form.sla.errors %}
+          <ul class="errorlist">{% for e in form.sla.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Application + Fournisseur -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:0.5rem">
+        <div class="form-group">
+          <label>Application <span style="color:#C66A28">*</span></label>
+          {{ form.application }}
+          {% if form.application.errors %}
+          <ul class="errorlist">{% for e in form.application.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label>
+            Fournisseur <span style="color:#C66A28">*</span>
+            <a href="{% url 'contrats:fournisseur_create' %}"
+               style="font-size:0.8rem;color:#2563EB;margin-left:0.5rem;font-weight:400"
+               target="_blank">+ Nouveau fournisseur</a>
+          </label>
+          {{ form.fournisseur }}
+          {% if form.fournisseur.errors %}
+          <ul class="errorlist">{% for e in form.fournisseur.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="margin-top:2rem;display:flex;gap:0.75rem;flex-wrap:wrap">
+        <button type="submit" class="btn" style="flex:1;justify-content:center">
+          💾 Enregistrer
+        </button>
+        <a href="{% if contract %}{% url 'contrats:contract_detail' contract.pk %}
+                 {% elif selected_type %}{% url 'contrats:contrat_type_list' contract_type=selected_type %}
+                 {% else %}{% url 'contrats:contrat_dashboard' %}{% endif %}"
+           class="btn" style="background:transparent;border:1px solid var(--border)">
+          Annuler
+        </a>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -88,8 +88,7 @@
                     <a href="{% url 'application_detail' app.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Voir</a>
                     <a href="{% url 'application_update' app.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Modifier</a>
                     {% if app.statut != 'ARCHIVE' %}
-                    <form action="{% url 'application_archive' app.pk %}" method="post" style="display:inline;"
-                          onsubmit="return confirm('Archiver cette application ?');">
+                      <form action="{% url 'application_archive' app.pk %}" method="post" style="display:inline;">
                         {% csrf_token %}
                         <button type="submit" class="btn danger" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Archiver</button>
                     </form>

@@ -8,11 +8,10 @@ from .models import Domaine
 
 
 def is_admin(user):
-    return user.is_authenticated and user.role == 'ADMIN'
+    return user.is_authenticated and user.role != 'TECH'
 
 
 @login_required
-@user_passes_test(is_admin)
 def domaine_list(request):
     query = request.GET.get('q', '').strip()
     domaines_list = Domaine.objects.all()
@@ -43,14 +42,13 @@ def domaine_list(request):
 
 
 @login_required
-@user_passes_test(is_admin)
 def domaine_detail(request, pk):
     domaine = get_object_or_404(Domaine, pk=pk)
     return render(request, 'domaines/domaine_detail.html', {'domaine': domaine})
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def domaine_create(request):
     if request.method == 'POST':
         form = DomaineForm(request.POST)
@@ -65,7 +63,7 @@ def domaine_create(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def domaine_update(request, pk):
     domaine = get_object_or_404(Domaine, pk=pk)
     if request.method == 'POST':
@@ -81,7 +79,7 @@ def domaine_update(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def domaine_delete(request, pk):
     domaine = get_object_or_404(Domaine, pk=pk)
     if request.method == 'POST':

@@ -27,8 +27,11 @@ urlpatterns = [
     path('environnements/', include('environments.urls')),
     path('domaines/', include('domaines.urls')),
     path('ssl/', include('certificats_ssl.urls')),
+    path('documentation/', include('documentation.urls')),
+    path('contrats/', include('contrats.urls', namespace='contrats')),
     path('', RedirectView.as_view(url='dashboard/')),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

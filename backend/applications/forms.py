@@ -26,9 +26,6 @@ class ApplicationForm(forms.ModelForm):
             'nombre_utilisateurs',
             'has_ssl',
             'responsable_metier',
-            'responsable_technique',
-            'chef_de_projet',
-            'equipe_support',
         ]
         widgets = {
             'nom': forms.TextInput(attrs={'class': 'form-input', 'placeholder': "Nom de l'application"}),
@@ -41,9 +38,6 @@ class ApplicationForm(forms.ModelForm):
             'nombre_utilisateurs': forms.NumberInput(attrs={'class': 'form-input', 'min': 0}),
             'has_ssl': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'responsable_metier': forms.Select(attrs={'class': 'form-select'}),
-            'responsable_technique': forms.Select(attrs={'class': 'form-select'}),
-            'chef_de_projet': forms.Select(attrs={'class': 'form-select'}),
-            'equipe_support': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -51,9 +45,6 @@ class ApplicationForm(forms.ModelForm):
         users = _user_queryset()
         for field_name in (
             'responsable_metier',
-            'responsable_technique',
-            'chef_de_projet',
-            'equipe_support',
         ):
             self.fields[field_name].queryset = users
             self.fields[field_name].required = True
@@ -67,10 +58,11 @@ class ApplicationForm(forms.ModelForm):
         self.fields['statut'].choices = statut_choices
 
         for field_name in self.fields:
-            if field_name not in ('date_fin_vie', 'has_ssl'):
+            if field_name not in ('date_fin_vie', 'has_ssl', 'date_mise_en_production'):
                 self.fields[field_name].required = True
         self.fields['date_fin_vie'].required = False
         self.fields['has_ssl'].required = False
+        self.fields['date_mise_en_production'].required = False
 
     def clean_nom(self):
         nom = self.cleaned_data.get('nom', '').strip()

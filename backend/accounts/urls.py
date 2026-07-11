@@ -15,4 +15,7 @@ urlpatterns = [
     path('dashboard/users/<int:pk>/edit/', views.user_update, name='user_update'),
     path('dashboard/users/<int:pk>/toggle/', views.user_toggle_active, name='user_toggle_active'),
     path('dashboard/users/import/', views.user_import_excel, name='user_import_excel'),
+    path('support/messages/', views.support_message_list, name='support_message_list'),
+    path('support/messages/new/', views.support_message_create, name='support_message_create'),
+    path('support/messages/<int:pk>/read/', views.support_message_mark_read, name='support_message_mark_read'),
 ]

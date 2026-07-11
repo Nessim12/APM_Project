@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Envoyer un message — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <h1>Envoyer un message à l'administrateur</h1>
+        <a href="{% url 'dashboard' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+    </div>
+
+    <div class="glass-card">
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6;">
+            Utilisez ce formulaire pour signaler une anomalie, un blocage ou une demande d'aide à l'équipe d'administration.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Sujet *</label>
+                <input type="text" name="subject" class="form-input" placeholder="Ex: Impossible d'ouvrir une application" required>
+            </div>
+
+            <div class="form-group">
+                <label>Message *</label>
+                <textarea name="message" class="form-input" rows="7" placeholder="Décrivez le problème ou la demande…" required></textarea>
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%; justify-content: center;">Envoyer</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

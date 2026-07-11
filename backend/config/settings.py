@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'environments',
     'domaines',
     'certificats_ssl',
+    'documentation',
+    'contrats',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +53,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'accounts.middleware.AdminRoleAccessMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -113,9 +116,13 @@ else:
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'OPTIONS': {
+            'user_attributes': ('username', 'first_name', 'last_name', 'email'),
+        },
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 8},
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -129,9 +136,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fr-fr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Tunis'
 
 USE_I18N = True
 
@@ -143,6 +150,45 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = Path(os.environ.get('MEDIA_ROOT', '/data/media'))
+
+SUPABASE_STORAGE_ENABLED = os.environ.get('SUPABASE_STORAGE_ENABLED', '').strip().lower() in ('1', 'true', 'yes')
+SUPABASE_STORAGE_BUCKET = os.environ.get('SUPABASE_STORAGE_BUCKET', '')
+SUPABASE_STORAGE_ACCESS_KEY = os.environ.get('SUPABASE_STORAGE_ACCESS_KEY', '')
+SUPABASE_STORAGE_SECRET_KEY = os.environ.get('SUPABASE_STORAGE_SECRET_KEY', '')
+SUPABASE_STORAGE_ENDPOINT = os.environ.get('SUPABASE_STORAGE_ENDPOINT', '')
+SUPABASE_STORAGE_REGION = os.environ.get('SUPABASE_STORAGE_REGION', 'eu-central-1')
+
+AWS_ACCESS_KEY_ID = SUPABASE_STORAGE_ACCESS_KEY
+AWS_SECRET_ACCESS_KEY = SUPABASE_STORAGE_SECRET_KEY
+AWS_STORAGE_BUCKET_NAME = SUPABASE_STORAGE_BUCKET
+AWS_S3_ENDPOINT_URL = SUPABASE_STORAGE_ENDPOINT
+AWS_S3_REGION_NAME = SUPABASE_STORAGE_REGION
+AWS_S3_ADDRESSING_STYLE = 'path'
+AWS_DEFAULT_ACL = None
+AWS_S3_FILE_OVERWRITE = False
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+
+if SUPABASE_STORAGE_ENABLED and not USE_SQLITE:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'config.storage_backends.SupabaseMediaStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
+else:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
 
 AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'login'

@@ -14,7 +14,7 @@ CertificatSSL = apps.get_model('ssl', 'CertificatSSL')
 
 
 def is_admin(user):
-    return user.is_authenticated and user.role == User.RoleChoices.ADMIN
+    return user.is_authenticated and user.role != User.RoleChoices.TECH
 
 
 def _filtered_queryset(request):
@@ -66,7 +66,6 @@ def _filtered_queryset(request):
 
 
 @login_required
-@user_passes_test(is_admin)
 def application_list(request):
     """Liste du patrimoine applicatif avec moteur de filtrage multicritères."""
     applications_list, filter_form = _filtered_queryset(request)
@@ -93,7 +92,6 @@ def application_list(request):
 
 
 @login_required
-@user_passes_test(is_admin)
 def application_detail(request, pk):
     """Consultation unitaire — fiche complète de l'application."""
     application = get_object_or_404(
@@ -103,7 +101,7 @@ def application_detail(request, pk):
             'chef_de_projet',
             'equipe_support',
             'certificat_ssl',
-        ),
+        ).prefetch_related('documents'),
         pk=pk,
     )
     return render(
@@ -114,7 +112,7 @@ def application_detail(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def application_create(request):
     """Création d'une nouvelle application."""
     if request.method == 'POST':
@@ -140,7 +138,7 @@ def application_create(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def application_update(request, pk):
     """Modification des métadonnées et des responsables assignés."""
     application = get_object_or_404(Application, pk=pk)
@@ -169,7 +167,7 @@ def application_update(request, pk):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='dashboard')
 def application_archive(request, pk):
     """
     Archivage logique (soft delete).

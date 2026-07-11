@@ -2,6 +2,8 @@
 
 Ce projet utilise **Docker** et **Docker Compose** pour simplifier la configuration de l'environnement de développement local avec **Django** et **MariaDB**.
 
+Les fichiers téléversés sont gérés séparément des métadonnées: les enregistrements restent dans PostgreSQL/Supabase, tandis que les binaires (PDF, PNG, DOCX, etc.) peuvent être stockés dans un bucket Supabase Storage quand l'environnement est configuré pour le faire.
+
 ---
 
 ## 📋 Prérequis
@@ -29,6 +31,15 @@ Depuis la racine du projet (là où se trouve le fichier `docker-compose.yml`), 
 ```bash
 docker compose build
 ```
+
+Si vous activez Supabase Storage pour les documents, ajoutez les variables d'environnement suivantes au conteneur Django:
+
+- `SUPABASE_STORAGE_ENABLED=true`
+- `SUPABASE_STORAGE_BUCKET=<nom-du-bucket>`
+- `SUPABASE_STORAGE_ACCESS_KEY=<access-key>`
+- `SUPABASE_STORAGE_SECRET_KEY=<secret-key>`
+- `SUPABASE_STORAGE_ENDPOINT=https://<project-ref>.supabase.co/storage/v1/s3`
+- `SUPABASE_STORAGE_REGION=eu-central-1`
 
 ---
 

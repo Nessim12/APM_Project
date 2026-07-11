@@ -5,8 +5,12 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - media_data:/data/media
     environment:
       USE_SQLITE: "0"
     dns:
       - 8.8.8.8
       - 8.8.4.4
+
+volumes:
+  media_data:
