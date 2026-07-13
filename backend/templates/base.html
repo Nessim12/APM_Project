@@ -375,7 +375,15 @@
       <a href="{% url 'dashboard' %}" class="navbar-brand">APM Panel</a>
       {% if user.role != 'ADMIN' %}
       <ul class="navbar-nav">
-
+        <li>
+          <a href="{% url 'application_list' %}" class="nav-item">Applications</a>
+        </li>
+        <li>
+          <a href="{% url 'ssl_list' %}" class="nav-item">SSL</a>
+        </li>
+        <li>
+          <a href="{% url 'document_list' %}" class="nav-item">Documentation</a>
+        </li>
         <li>
           <details class="nav-dropdown" id="contractsDropdown">
             <summary id="contractsDropdownLink" class="nav-item nav-dropdown-trigger">
@@ -407,24 +415,6 @@
               >
             </div>
           </details>
-        </li>
-        {% endif %}
-
-        {% if user.role in 'ADMIN,ADMIN_SYS' %}
-        <li>
-          <a href="{% url 'dashboard' %}" class="nav-item">Utilisateurs</a>
-        </li>
-        <li>
-          <a href="{% url 'application_list' %}" class="nav-item">Applications</a>
-        </li>
-        <li>
-          <a href="{% url 'ssl_list' %}" class="nav-item">SSL</a>
-        </li>
-        {% endif %}
-
-        {% if user.role != 'ADMIN' %}
-        <li>
-          <a href="{% url 'document_list' %}" class="nav-item">Documentation</a>
         </li>
       </ul>
       {% endif %}

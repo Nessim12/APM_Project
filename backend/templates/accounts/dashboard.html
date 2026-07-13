@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="header-row">
-    {% if can_manage_users %}
+    {% if show_users_table %}
     <h1>Gestion des Utilisateurs</h1>
     <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
         <a href="{% url 'user_import_excel' %}" class="btn success">Import Excel</a>
@@ -18,7 +18,7 @@
     {% endif %}
 </div>
 
-{% if not can_manage_users %}
+{% if not show_users_table %}
 <!-- Hero Section -->
 <div class="glass-card hero-card" style="margin-bottom: 2rem; padding: 2.5rem 3rem; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2rem;">
     <div class="hero-blob hero-blob-orange"></div>
@@ -51,7 +51,7 @@
         <span style="color: var(--text-muted); font-size: 0.85rem;">Plateforme APM</span>
     </div>
     
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
         
         <!-- Application Card -->
         <a href="{% url 'application_list' %}" class="module-card">
@@ -112,6 +112,7 @@
     </div>
 </div>
 
+{% if user.role == 'ADMIN_SYS' %}
 <!-- Infrastructure Monitoring Section -->
 <div style="margin-bottom: 2.5rem;" id="vm-monitoring-section">
     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
@@ -271,6 +272,7 @@ document.addEventListener("DOMContentLoaded", function() {
         color: var(--text-main);
     }
 </style>
+{% endif %}
 </div>
 
 <style>
@@ -445,7 +447,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </style>
 {% endif %}
 
-{% if can_manage_users %}
+{% if show_users_table %}
 <div class="glass-card" style="margin-bottom: 2rem;">
     <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
         Recherche &amp; Filtres

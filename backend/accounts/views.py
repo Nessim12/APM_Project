@@ -213,6 +213,8 @@ def dashboard(request):
     url_params = params.urlencode()
     url_params_str = f"&{url_params}" if url_params else ""
 
+    show_users = request.GET.get('view') == 'users'
+
     return render(request, 'accounts/dashboard.html', {
         'users': users, 
         'page_obj': users, 
@@ -221,6 +223,7 @@ def dashboard(request):
         'sort_by': sort_by,
         'sort_urls': sort_urls,
         'can_manage_users': can_manage_users(request.user),
+        'show_users_table': can_manage_users(request.user) and show_users,
         'current_role': request.user.role,
     })
 
