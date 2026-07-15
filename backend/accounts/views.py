@@ -213,7 +213,7 @@ def dashboard(request):
     url_params = params.urlencode()
     url_params_str = f"&{url_params}" if url_params else ""
 
-    show_users = request.GET.get('view') == 'users'
+    show_users = request.GET.get('view') == 'users' or request.user.role == User.RoleChoices.ADMIN
 
     return render(request, 'accounts/dashboard.html', {
         'users': users, 
