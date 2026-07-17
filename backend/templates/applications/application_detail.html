@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ application.nom }} — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <h1>{{ application.nom }}</h1>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{% url 'application_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+            <a href="{% url 'application_update' application.pk %}" class="btn">Modifier</a>
+            {% if application.statut != 'ARCHIVE' %}
+            <form action="{% url 'application_archive' application.pk %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn danger">Archiver</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+            Métadonnées
+        </h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Criticité</div>
+                <div>{{ application.get_criticite_display }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Statut</div>
+                <div>{{ application.get_statut_display }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Direction métier</div>
+                <div>{{ application.direction_metier }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Nombre d'utilisateurs</div>
+                <div>{{ application.nombre_utilisateurs }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Mise en production</div>
+                <div>{{ application.date_mise_en_production|date:"d/m/Y" }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Fin de vie</div>
+                <div>{{ application.date_fin_vie|date:"d/m/Y"|default:"—" }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Certificat SSL</div>
+                <div>
+                    {% if application.has_ssl %}
+                        <span class="badge tech">Requis</span>
+                        {% if application.certificat_ssl %}
+                            <a href="{% url 'ssl_detail' application.certificat_ssl.pk %}" class="btn" style="padding: 0.3rem 0.7rem; font-size: 0.8rem; margin-left: 0.5rem;">Voir le certificat</a>
+                        {% else %}
+                            <a href="{% url 'ssl_create' %}?application={{ application.pk }}" class="btn" style="padding: 0.3rem 0.7rem; font-size: 0.8rem; margin-left: 0.5rem;">Configurer SSL</a>
+                        {% endif %}
+                    {% else %}
+                        <span style="color: var(--text-muted);">Non requis</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Environnements</div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    {% for env in application.environnements.all %}
+                        <a href="{% url 'environment_detail' env.pk %}" class="badge admin_sys" style="text-decoration: none;">{{ env.nom }}</a>
+                    {% empty %}
+                        <span style="color: var(--text-muted);">Aucun environnement</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div style="margin-top: 1.5rem;">
+            <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Description</div>
+            <div style="line-height: 1.6;">{{ application.description|linebreaksbr }}</div>
+        </div>
+    </div>
+
+    <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">
+                Documentation
+            </h3>
+            <a href="{% url 'document_create' %}?type_gestion=APPLICATION&application={{ application.pk }}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                + Ajouter
+            </a>
+        </div>
+        {% if application.documents.all %}
+        <div class="doc-grid doc-grid-compact">
+            {% for doc in application.documents.all %}
+            <article class="doc-card doc-card-compact glass-card">
+                <div class="doc-card-icon">{{ doc.icone_fichier }}</div>
+                <div class="doc-card-body">
+                    <h4 class="doc-card-title">
+                        <a href="{% url 'document_detail' doc.pk %}">{{ doc.nom }}</a>
+                    </h4>
+                    <div class="doc-card-meta">
+                        <span class="badge">{{ doc.get_categorie_display }}</span>
+                        <span class="doc-type-label">{{ doc.type_fichier|upper }}</span>
+                    </div>
+                </div>
+                <a href="{% url 'document_download' doc.pk %}" class="btn doc-download-btn" style="padding: 0.35rem 0.7rem; font-size: 0.8rem;">⬇</a>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color: var(--text-muted);">Aucun document rattaché à cette application.</p>
+        {% endif %}
+    </div>
+
+    <div class="glass-card">
+        <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+            Gouvernance — Responsable
+        </h3>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Responsable métier</div>
+                <div>{{ application.responsable_metier.get_full_name }} <span style="color: var(--text-muted);">({{ application.responsable_metier.matricule }})</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

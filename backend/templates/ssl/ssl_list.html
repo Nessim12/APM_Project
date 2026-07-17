@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestion SSL — APM{% endblock %}
+
+{% block content %}
+<div class="ssl-page">
+    <div class="ssl-page-header">
+        <div>
+            <h1>Gestion SSL</h1>
+            <p class="ssl-page-subtitle">{{ page_obj.paginator.count }} certificat{{ page_obj.paginator.count|pluralize }} · suivi des expirations</p>
+        </div>
+        <div class="ssl-header-actions">
+            <a href="{% url 'ssl_create' %}" class="btn">Nouveau certificat</a>
+        </div>
+    </div>
+
+    <div class="glass-card ssl-toolbar">
+        <form method="get" action="{% url 'ssl_list' %}" class="ssl-filters">
+            <div class="ssl-filter-field ssl-filter-field--search">
+                <label for="id_q">{{ filter_form.q.label }}</label>
+                {{ filter_form.q }}
+            </div>
+            <div class="ssl-filter-field ssl-filter-field--statut">
+                <label for="id_statut">{{ filter_form.statut.label }}</label>
+                {{ filter_form.statut }}
+            </div>
+            <div class="ssl-filter-actions">
+                <button type="submit" class="btn">Rechercher</button>
+                {% if has_active_filters %}
+                <a href="{% url 'ssl_list' %}" class="btn btn-ghost">Réinitialiser</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    {% if certificats_en_alerte or apps_sans_certificat > 0 %}
+    <div class="glass-card ssl-panel">
+        <div class="ssl-kpis">
+            {% if certificats_en_alerte %}
+            <span class="ssl-kpi ssl-kpi--alert">
+                <strong>{{ certificats_en_alerte|length }}</strong> en alerte
+            </span>
+            {% else %}
+            <span class="ssl-kpi ssl-kpi--ok">Aucune alerte</span>
+            {% endif %}
+            {% if apps_sans_certificat > 0 %}
+            <a href="{% url 'application_list' %}" class="ssl-kpi ssl-kpi--warn">
+                <strong>{{ apps_sans_certificat }}</strong> app{{ apps_sans_certificat|pluralize }} sans certificat
+            </a>
+            {% endif %}
+        </div>
+
+        {% if certificats_en_alerte %}
+        <div class="ssl-alert-list">
+            {% for item in certificats_en_alerte %}
+            <div class="ssl-alert-item">
+                <div class="ssl-alert-item-main">
+                    {% if item.niveau == 'EXPIRE' %}
+                        <span class="badge admin">{{ item.niveau_label }}</span>
+                    {% elif item.niveau == 'J30' %}
+                        <span class="badge tech">{{ item.niveau_label }}</span>
+                    {% else %}
+                        <span class="badge membre">{{ item.niveau_label }}</span>
+                    {% endif %}
+                    <span class="ssl-alert-app">{{ item.certificat.application.nom }}</span>
+                    <span class="ssl-alert-sep">·</span>
+                    <a href="{% url 'ssl_detail' item.certificat.pk %}" class="ssl-alert-domain">{{ item.certificat.domaine }}</a>
+                    <span class="ssl-alert-meta">{{ item.certificat.jours_restants_label }} · expire le {{ item.certificat.date_expiration|date:"d/m/Y" }}</span>
+                </div>
+                <a href="{% url 'ssl_detail' item.certificat.pk %}" class="btn btn-sm">Voir</a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="glass-card ssl-table-card">
+        <table class="ssl-table">
+            <thead>
+                <tr>
+                    <th>Application</th>
+                    <th>Domaine</th>
+                    <th>Fournisseur SSL</th>
+                    <th>Date d'expiration</th>
+                    <th>Jours restants</th>
+                    <th>État</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for certificat in certificats %}
+                <tr>
+                    <td>
+                        <a href="{% url 'application_detail' certificat.application.pk %}">{{ certificat.application.nom }}</a>
+                    </td>
+                    <td><a href="{% url 'ssl_detail' certificat.pk %}">{{ certificat.domaine }}</a></td>
+                    <td>{{ certificat.emetteur }}</td>
+                    <td>{{ certificat.date_expiration|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if certificat.jours_restants_css_class == 'danger' %}
+                            <span class="ssl-days ssl-days--danger">{{ certificat.jours_restants_label }}</span>
+                        {% elif certificat.jours_restants_css_class == 'warning' %}
+                            <span class="ssl-days ssl-days--warning">{{ certificat.jours_restants_label }}</span>
+                        {% else %}
+                            <span class="ssl-days ssl-days--ok">{{ certificat.jours_restants_label }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if certificat.statut_calcule == 'ACTIF' %}
+                            <span class="badge membre">{{ certificat.get_statut_calcule_display }}</span>
+                        {% elif certificat.statut_calcule == 'EXPIRE' %}
+                            <span class="badge admin">{{ certificat.get_statut_calcule_display }}</span>
+                        {% else %}
+                            <span class="badge tech">{{ certificat.get_statut_calcule_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="ssl-actions">
+                        <a href="{% url 'ssl_detail' certificat.pk %}" class="btn btn-sm">Voir</a>
+                        <a href="{% url 'ssl_update' certificat.pk %}" class="btn btn-sm btn-ghost">Modifier</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="ssl-empty">Aucun certificat SSL trouvé.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="ssl-pagination">
+            {% include 'pagination.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}

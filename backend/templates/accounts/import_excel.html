@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Importation Excel - APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+<div class="header-row">
+    <h1>Importer des Utilisateurs via Excel</h1>
+    <a href="{% url 'dashboard' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">Retour</a>
+</div>
+
+<div class="glass-card">
+    <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
+        Veuillez sélectionner un fichier Excel (.xlsx). Le fichier doit avoir les colonnes dans l'ordre suivant (la 1ère ligne est ignorée) :<br>
+        <strong style="color: white;">Prénom | Nom | Email | Téléphone | Département | Rôle (ADMIN/ADMIN_SYS/TECH/MEMBRE)</strong>
+    </p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group" style="padding: 2rem; border: 2px dashed rgba(59, 130, 246, 0.5); border-radius: 1rem; text-align: center; margin-bottom: 2rem; background: rgba(0,0,0,0.2);">
+            {{ form.excel_file }}
+        </div>
+        
+        <button type="submit" class="btn" style="width: 100%; justify-content: center;">
+            Lancer l'importation
+        </button>
+    </form>
+</div>
+</div>
+{% endblock %}

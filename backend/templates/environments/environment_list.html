@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestion des Environnements — APM{% endblock %}
+
+{% block content %}
+<div class="header-row">
+    <h1>Gestion des Environnements</h1>
+    <a href="{% url 'environment_create' %}" class="btn">Nouvel Environnement</a>
+</div>
+
+<div class="glass-card" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+        Recherche
+    </h3>
+    <form method="get" action="{% url 'environment_list' %}">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Nom</label>
+                <input type="search" name="q" value="{{ query }}" class="form-input" placeholder="Rechercher par nom…">
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn" style="flex: 1; justify-content: center;">Rechercher</button>
+                <a href="{% url 'environment_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">Réinitialiser</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="glass-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>App</th>
+                <th>URL</th>
+                <th>IP</th>
+                <th>OS</th>
+                <th>Serveur</th>
+                <th>Docker</th>
+                <th>Kubernetes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for environment in environments %}
+            <tr>
+                <td><a href="{% url 'environment_detail' environment.pk %}">{{ environment.nom }}</a></td>
+                <td>{{ environment.application.nom }}</td>
+                <td><a href="{{ environment.url }}" target="_blank" rel="noopener">{{ environment.url }}</a></td>
+                <td>{{ environment.adresse_ip }}</td>
+                <td>{{ environment.os }}</td>
+                <td>{% if environment.serveur %}{{ environment.serveur.hostname }}{% else %}—{% endif %}</td>
+                <td>{% if environment.docker %}Oui{% else %}Non{% endif %}</td>
+                <td>{% if environment.kubernetes %}Oui{% else %}Non{% endif %}</td>
+                <td style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="{% url 'environment_detail' environment.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Voir</a>
+                    <a href="{% url 'environment_update' environment.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Modifier</a>
+                   
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="text-align: center; color: var(--text-muted);">Aucun environnement trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

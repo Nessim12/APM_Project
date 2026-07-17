@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block title %}Monitoring - APM{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 style="margin: 0;">Infrastructure Monitoring</h1>
+        <p style="color: var(--text-muted); margin-top: 0.35rem; font-size: 0.95rem;">
+            Statistiques avancées, courbes de consommation et alertes système.
+        </p>
+    </div>
+    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <select id="vm-selector" class="monitoring-select">
+            <option value="">Toutes les VMs (flotte)</option>
+        </select>
+        <select id="period-selector" class="monitoring-select">
+            <option value="7" selected>7 derniers jours</option>
+            <option value="14">14 derniers jours</option>
+            <option value="30">30 derniers jours</option>
+        </select>
+        <span style="color: var(--text-muted); font-size: 0.85rem;" id="vm-last-update">Mise à jour: en cours...</span>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="monitoring-stats-grid">
+    <div class="glass-card stat-card">
+        <div class="stat-label">Total VMs</div>
+        <div class="stat-value" id="vm-total">-</div>
+    </div>
+    <div class="glass-card stat-card">
+        <div class="stat-label" style="color: #4ade80;">Online VMs</div>
+        <div class="stat-value" id="vm-online">-</div>
+    </div>
+    <div class="glass-card stat-card">
+        <div class="stat-label" style="color: #f87171;">Offline VMs</div>
+        <div class="stat-value" id="vm-offline">-</div>
+    </div>
+    <div class="glass-card stat-card">
+        <div class="stat-label">Moy. CPU</div>
+        <div class="stat-value" id="vm-avg-cpu">- %</div>
+    </div>
+    <div class="glass-card stat-card">
+        <div class="stat-label">Moy. RAM</div>
+        <div class="stat-value" id="vm-avg-ram">- %</div>
+    </div>
+    <div class="glass-card stat-card">
+        <div class="stat-label">Moy. Disque</div>
+        <div class="stat-value" id="vm-avg-disk">- %</div>
+    </div>
+    <div class="glass-card stat-card">
+        <div class="stat-label">Pic CPU</div>
+        <div class="stat-value" id="vm-max-cpu">- %</div>
+    </div>
+    <div class="glass-card stat-card">
+        <div class="stat-label">Pic RAM</div>
+        <div class="stat-value" id="vm-max-ram">- %</div>
+    </div>
+    <div class="glass-card stat-card">
+        <div class="stat-label">Alertes / jour</div>
+        <div class="stat-value" id="vm-avg-logs">-</div>
+    </div>
+</div>
+
+
+<!-- VMs Table -->
+<div style="margin-top: 2rem;">
+    <h3 class="section-title" style="margin-bottom: 1rem;">Détail des machines virtuelles</h3>
+    <div class="glass-card" style="overflow-x: auto;">
+        <table id="vm-table">
+            <thead>
+                <tr>
+                    <th>Hostname</th>
+                    <th>IP Address</th>
+                    <th>OS</th>
+                    <th>CPU Usage</th>
+                    <th>RAM Usage</th>
+                    <th>Disk Usage</th>
+                    <th>Status</th>
+                    <th>Last Seen</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted);">Chargement des données...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .monitoring-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        padding: 1.25rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.4rem;
+    }
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    .monitoring-select {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+    .section-title {
+        margin: 0;
+        color: var(--text-main);
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+    .mono-code {
+        font-family: monospace;
+        color: var(--blue-light);
+    }
+    [data-theme="light"] .mono-code {
+        color: var(--blue);
+    }
+    .badge-active {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    [data-theme="dark"] .badge-active {
+        color: #6ee7b7;
+    }
+    .badge-inactive {
+        background: rgba(239, 68, 68, 0.12);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.22);
+    }
+    [data-theme="dark"] .badge-inactive {
+        color: #fca5a5;
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let vmList = [];
+
+    function updateStatsBoxes(data) {
+        const stats = data.fleet || data.stats || {};
+        document.getElementById('vm-avg-cpu').innerText = (stats.avg_cpu || 0).toFixed(1) + '%';
+        document.getElementById('vm-avg-ram').innerText = (stats.avg_ram || 0).toFixed(1) + '%';
+        document.getElementById('vm-avg-disk').innerText = (stats.avg_disk || 0).toFixed(1) + '%';
+        document.getElementById('vm-max-cpu').innerText = (stats.max_cpu || 0).toFixed(1) + '%';
+        document.getElementById('vm-max-ram').innerText = (stats.max_ram || 0).toFixed(1) + '%';
+        document.getElementById('vm-avg-logs').innerText = (stats.avg_log_alerts_per_day || 0).toFixed(1);
+    }
+
+    function updateVMTable(data) {
+        const tbody = document.querySelector("#vm-table tbody");
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Aucune VM enregistrée.</td></tr>';
+            updateStats(0, 0, 0);
+            return;
+        }
+
+        let onlineCount = 0, offlineCount = 0;
+        data.forEach(vm => {
+            if (vm.status === 'Online') onlineCount++;
+            else offlineCount++;
+
+            const statusBadge = vm.status === 'Online'
+                ? '<span class="badge badge-active">Online</span>'
+                : '<span class="badge badge-inactive">Offline</span>';
+            const lastSeen = new Date(vm.last_seen).toLocaleString();
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><strong>${vm.hostname}</strong></td>
+                <td><span class="mono-code">${vm.ip_address}</span></td>
+                <td>${vm.operating_system}</td>
+                <td>${vm.latest_cpu.toFixed(1)}%</td>
+                <td>${vm.latest_ram.toFixed(1)}%</td>
+                <td>${vm.latest_disk.toFixed(1)}%</td>
+                <td>${statusBadge}</td>
+                <td>${lastSeen}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        updateStats(data.length, onlineCount, offlineCount);
+    }
+
+    function updateStats(total, online, offline) {
+        document.getElementById('vm-total').innerText = total;
+        document.getElementById('vm-online').innerText = online;
+        document.getElementById('vm-offline').innerText = offline;
+    }
+
+    function populateVMSelector(vms) {
+        const selector = document.getElementById('vm-selector');
+        const current = selector.value;
+        selector.innerHTML = '<option value="">Toutes les VMs (flotte)</option>';
+        vms.forEach(vm => {
+            const opt = document.createElement('option');
+            opt.value = vm.id;
+            opt.textContent = vm.hostname;
+            selector.appendChild(opt);
+        });
+        if (current) selector.value = current;
+    }
+
+    function fetchSummary() {
+        const days = document.getElementById('period-selector').value;
+        const vmId = document.getElementById('vm-selector').value;
+        const url = vmId
+            ? `/api/vm/${vmId}/metrics/summary/?days=${days}`
+            : `/api/vm/metrics/summary/?days=${days}`;
+
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                updateStatsBoxes(data);
+                document.getElementById('vm-last-update').innerText = "Dernière mise à jour : " + new Date().toLocaleTimeString();
+            })
+            .catch(err => {
+                console.error("Error fetching summary:", err);
+                document.getElementById('vm-last-update').innerText = "Erreur de connexion";
+            });
+    }
+
+    function fetchVMList() {
+        fetch('/api/vm/')
+            .then(r => r.json())
+            .then(data => {
+                vmList = data;
+                updateVMTable(data);
+                populateVMSelector(data);
+            })
+            .catch(err => console.error("Error fetching VMs:", err));
+    }
+
+    fetchVMList();
+    fetchSummary();
+
+    document.getElementById('vm-selector').addEventListener('change', fetchSummary);
+    document.getElementById('period-selector').addEventListener('change', fetchSummary);
+    setInterval(() => { fetchVMList(); fetchSummary(); }, 30000);
+});
+</script>
+{% endblock %}

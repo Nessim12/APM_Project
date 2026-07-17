@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% block title %}Contrat {{ contract.numero_contrat }} — APM{% endblock %}
+{% block content %}
+
+<!-- ── En-tête ───────────────────────────────────────────────────────── -->
+<div class="header-row">
+  <div style="display:flex;align-items:center;gap:1rem">
+    <div style="width:52px;height:52px;border-radius:14px;
+                background:{{ contract.type_bg }};
+                display:flex;align-items:center;justify-content:center;
+                font-size:1.6rem;flex-shrink:0">
+      {{ contract.type_icon }}
+    </div>
+    <div>
+      <h1 style="margin:0">{{ contract.numero_contrat }}</h1>
+      <p style="margin:0.25rem 0 0;color:var(--text-muted);font-size:0.9rem">
+        Type : <strong style="color:{{ contract.type_color }}">{{ contract.get_contract_type_display }}</strong>
+      </p>
+    </div>
+  </div>
+  <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center">
+    <a href="{% url 'contrats:contract_update' contract.pk %}" class="btn">Modifier</a>
+            <form action="{% url 'contrats:contract_delete' contract.pk %}" method="post"
+              style="display:inline">
+      {% csrf_token %}
+     
+    </form>
+    <a href="{% url 'contrats:contrat_type_list' contract_type=contract.contract_type %}"
+       class="btn" style="background:transparent;border:1px solid var(--border)">← Retour</a>
+  </div>
+</div>
+
+<!-- ── Alerte expiration ─────────────────────────────────────────────── -->
+{% if contract.statut == 'EXPIRE' %}
+<div class="alert error" style="margin-bottom:1.5rem">
+  ⚠ Ce contrat a expiré — {{ contract.jours_restants_label }}.
+  ({{ contract.date_fin|date:'d/m/Y' }}).
+</div>
+{% elif contract.est_proche_expiration %}
+<div class="alert warning" style="margin-bottom:1.5rem">
+  🕐 Ce contrat expire dans {{ contract.jours_restants }} jours ({{ contract.date_fin|date:'d/m/Y' }}).
+  Pensez à le renouveler.
+</div>
+{% endif %}
+
+<!-- ── Grille de détails ─────────────────────────────────────────────── -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem">
+
+  <!-- Informations générales -->
+  <div class="glass-card">
+    <h3 style="margin-bottom:1.2rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem">
+      📋 Informations générales
+    </h3>
+    <dl class="detail-grid">
+      <dt>Numéro de contrat</dt>
+      <dd style="font-weight:600">{{ contract.numero_contrat }}</dd>
+
+      <dt>Type</dt>
+      <dd>
+        <span class="badge" style="background:{{ contract.type_bg }};color:{{ contract.type_color }}">
+          {{ contract.type_icon }} {{ contract.get_contract_type_display }}
+        </span>
+      </dd>
+
+      <dt>Statut</dt>
+      <dd>
+        {% if contract.statut == 'ACTIF' %}
+          <span class="badge" style="background:rgba(16,185,129,0.12);color:#34d399">✓ Actif</span>
+        {% elif contract.statut == 'EN_ATTENTE' %}
+          <span class="badge" style="background:rgba(251,191,36,0.12);color:#fbbf24">⏳ En attente</span>
+        {% else %}
+          <span class="badge" style="background:rgba(239,68,68,0.12);color:#f87171">✗ Expiré</span>
+        {% endif %}
+      </dd>
+
+      <dt>SLA</dt>
+      <dd>{{ contract.sla }}</dd>
+    </dl>
+  </div>
+
+  <!-- Période et finances -->
+  <div class="glass-card">
+    <h3 style="margin-bottom:1.2rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem">
+      📅 Période & Finances
+    </h3>
+    <dl class="detail-grid">
+      <dt>Date de début</dt>
+      <dd>{{ contract.date_debut|date:'d/m/Y' }}</dd>
+
+      <dt>Date de fin</dt>
+      <dd>{{ contract.date_fin|date:'d/m/Y' }}</dd>
+
+      <dt>Jours restants</dt>
+      <dd>
+        {% with jr=contract.jours_restants %}
+          {% if jr < 0 %}
+            <span style="color:#f87171;font-weight:600">{{ contract.jours_restants_label }}</span>
+          {% elif jr == 0 %}
+            <span style="color:#f87171;font-weight:600">Expire aujourd'hui !</span>
+          {% elif jr <= 30 %}
+            <span style="color:#f87171;font-weight:600">{{ jr }} jours</span>
+          {% elif jr <= 90 %}
+            <span style="color:#fbbf24;font-weight:600">{{ jr }} jours</span>
+          {% else %}
+            <span style="color:#34d399;font-weight:600">{{ jr }} jours</span>
+          {% endif %}
+        {% endwith %}
+      </dd>
+
+      <dt>Coût annuel</dt>
+      <dd style="font-size:1.15rem;font-weight:700;color:#93c5fd">
+        {{ contract.cout_annuel|floatformat:2 }} د.ج
+      </dd>
+
+      <dt>Créé le</dt>
+      <dd style="color:var(--text-muted)">{{ contract.created_at|date:'d/m/Y H:i' }}</dd>
+
+      <dt>Mis à jour le</dt>
+      <dd style="color:var(--text-muted)">{{ contract.updated_at|date:'d/m/Y H:i' }}</dd>
+    </dl>
+  </div>
+
+  <!-- Liens -->
+  <div class="glass-card">
+    <h3 style="margin-bottom:1.2rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem">
+      🔗 Relations
+    </h3>
+    <dl class="detail-grid">
+
+      <dt>Application</dt>
+      <dd>
+        <a href="{% url 'application_detail' contract.application.pk %}"
+           style="color:#93c5fd;text-decoration:none;font-weight:600">
+          {{ contract.application.nom }}
+        </a>
+        <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.2rem">
+          Criticité : {{ contract.application.get_criticite_display }}
+        </div>
+      </dd>
+
+      <dt>Fournisseur</dt>
+      <dd>
+        <a href="{% url 'contrats:fournisseur_update' contract.fournisseur.pk %}"
+           style="color:#93c5fd;text-decoration:none;font-weight:600">
+          {{ contract.fournisseur.nom }}
+        </a>
+        {% if contract.fournisseur.email %}
+        <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.2rem">
+          {{ contract.fournisseur.email }}
+        </div>
+        {% endif %}
+        {% if contract.fournisseur.telephone %}
+        <div style="color:var(--text-muted);font-size:0.82rem">
+          📞 {{ contract.fournisseur.telephone }}
+        </div>
+        {% endif %}
+        {% if contract.fournisseur.responsable %}
+        <div style="color:var(--text-muted);font-size:0.82rem">
+          Contact : {{ contract.fournisseur.responsable }}
+        </div>
+        {% endif %}
+      </dd>
+
+    </dl>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ environment.nom }} — Environnement — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <h1>{{ environment.nom }}</h1>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <a href="{% url 'environment_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+            <a href="{% url 'environment_update' environment.pk %}" class="btn">Modifier</a>
+           
+        </div>
+    </div>
+
+    <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+                <h3 style="margin-bottom: 0.75rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">Détails</h3>
+                <dl class="detail-list">
+                    <div>
+                        <dt>URL</dt>
+                        <dd><a href="{{ environment.url }}" target="_blank" rel="noopener">{{ environment.url }}</a></dd>
+                    </div>
+                    <div>
+                        <dt>Adresse IP</dt>
+                        <dd>{{ environment.adresse_ip }}</dd>
+                    </div>
+                    <div>
+                        <dt>OS</dt>
+                        <dd>{{ environment.os }}</dd>
+                    </div>
+                    <div>
+                        <dt>CPU</dt>
+                        <dd>{{ environment.cpu }}</dd>
+                    </div>
+                    <div>
+                        <dt>RAM</dt>
+                        <dd>{{ environment.ram }}</dd>
+                    </div>
+                    <div>
+                        <dt>Hébergeur</dt>
+                        <dd>{{ environment.hebergeur }}</dd>
+                    </div>
+                    <div>
+                        <dt>Type d’hébergement</dt>
+                        <dd>{{ environment.get_type_hebergement_display }}</dd>
+                    </div>
+                    <div>
+                        <dt>Docker</dt>
+                        <dd>{% if environment.docker %}Oui{% else %}Non{% endif %}</dd>
+                    </div>
+                    <div>
+                        <dt>Kubernetes</dt>
+                        <dd>{% if environment.kubernetes %}Oui{% else %}Non{% endif %}</dd>
+                    </div>
+                    <div>
+                        <dt>Application</dt>
+                        <dd>{{ environment.application.nom }}</dd>
+                    </div>
+                    <div>
+                        <dt>Serveur</dt>
+                        {% if environment.serveur %}
+                        <dd>{{ environment.serveur.hostname }}</dd>
+                        {% else %}
+                        <dd>—</dd>
+                        {% endif %}
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

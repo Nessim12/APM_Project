@@ -1,0 +1,825 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de bord - APM{% endblock %}
+
+{% block content %}
+{% if show_users_table %}
+<div class="header-row">
+    <h1>Gestion des Utilisateurs</h1>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="{% url 'user_import_excel' %}" class="btn success">Import Excel</a>
+        <a href="{% url 'user_create' %}" class="btn">Nouveau Utilisateur</a>
+    </div>
+</div>
+{% endif %}
+
+{% if show_logs_table %}
+<div class="header-row">
+    <h1>Suivi d'Activité (Logs &amp; Traçabilité)</h1>
+</div>
+{% endif %}
+
+{% if not show_users_table and not show_logs_table %}
+{% if user.role != 'ADMIN_SYS' %}
+<!-- Hero Section -->
+<div class="glass-card hero-card" style="margin-bottom: 2rem; padding: 2.5rem 3rem; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2rem;">
+    <div class="hero-blob hero-blob-orange"></div>
+    <div class="hero-blob hero-blob-blue"></div>
+    
+    <div style="position: relative; z-index: 1;">
+        <h2 class="hero-greeting">
+            Bonjour, {{ user.first_name }} 👋
+        </h2>
+        <p style="margin: 0; color: var(--text-muted); font-size: 1.05rem; max-width: 500px; line-height: 1.6;">
+            Bienvenue sur votre espace de gestion centralisée. Accédez rapidement à vos outils et supervisez votre infrastructure technique en temps réel.
+        </p>
+    </div>
+    
+    <div style="position: relative; z-index: 1; display: flex; gap: 1rem;">
+        <div class="hero-role-badge">
+            <div class="hero-role-label">Rôle Actuel</div>
+            <div class="hero-role-value">
+                <span class="hero-role-dot"></span>
+                {{ user.get_role_display }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modules Grid -->
+<div style="margin-bottom: 2.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+        <h3 class="section-title">Modules Principaux</h3>
+        <span style="color: var(--text-muted); font-size: 0.85rem;">Plateforme APM</span>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+        
+        <!-- Application Card -->
+        <a href="{% url 'application_list' %}" class="module-card">
+            <div class="module-card-icon" style="background: rgba(232, 130, 58, 0.15); border-color: rgba(232, 130, 58, 0.3);">
+                <span style="font-size: 2.2rem;">🖥️</span>
+            </div>
+            <div class="module-card-content">
+                <h3>Gestion des applications</h3>
+                <p>Consultez le référentiel des applications métier, gérez les dépendances, et maintenez à jour les métadonnées de l'entreprise.</p>
+                <div class="module-card-footer">
+                    <span class="module-card-link orange">Ouvrir le module &rarr;</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Environment Card -->
+        <a href="{% url 'environment_list' %}" class="module-card">
+            <div class="module-card-icon" style="background: rgba(29, 79, 168, 0.2); border-color: rgba(29, 79, 168, 0.35);">
+                <span style="font-size: 2.2rem;">⚙️</span>
+            </div>
+            <div class="module-card-content">
+                <h3>Gestion des environnements</h3>
+                <p>Pilotez l'ensemble de vos serveurs (PROD, PREPROD, TEST), surveillez l'état de l'infrastructure et gérez les instances logicielles.</p>
+                <div class="module-card-footer">
+                    <span class="module-card-link blue">Ouvrir le module &rarr;</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- SSL Card -->
+        <a href="{% url 'ssl_list' %}" class="module-card">
+            <div class="module-card-icon" style="background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.3);">
+                <span style="font-size: 2.2rem;">🔒</span>
+            </div>
+            <div class="module-card-content">
+                <h3>Gestion SSL</h3>
+                <p>Surveillez la validité de vos certificats de sécurité SSL/TLS, anticipez les expirations et gérez les renouvellements.</p>
+                <div class="module-card-footer">
+                    <span class="module-card-link green">Ouvrir le module &rarr;</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Domaines Card -->
+        <a href="{% url 'domaine_list' %}" class="module-card">
+            <div class="module-card-icon" style="background: rgba(144, 184, 248, 0.15); border-color: rgba(144, 184, 248, 0.3);">
+                <span style="font-size: 2.2rem;">🌐</span>
+            </div>
+            <div class="module-card-content">
+                <h3>Gestion des domaines</h3>
+                <p>Administrez vos noms de domaines externes et internes, supervisez les zones DNS et sécurisez votre présence en ligne.</p>
+                <div class="module-card-footer">
+                    <span class="module-card-link lightblue">Ouvrir le module &rarr;</span>
+                </div>
+            </div>
+        </a>
+
+        {% if user.role == 'ADMIN_SYS' %}
+        <!-- Monitoring Card -->
+        <a href="{% url 'monitoring_dashboard' %}" class="module-card">
+            <div class="module-card-icon" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.3);">
+                <span style="font-size: 2.2rem;">📊</span>
+            </div>
+            <div class="module-card-content">
+                <h3>Monitoring Infrastructure</h3>
+                <p>Visualisez les courbes CPU/RAM, les pics de consommation, les alertes système et supervisez vos machines virtuelles en temps réel.</p>
+                <div class="module-card-footer">
+                    <span class="module-card-link" style="color: #a855f7;">Ouvrir le module &rarr;</span>
+                </div>
+            </div>
+        </a>
+        {% endif %}
+
+    </div>
+</div>
+{% endif %}
+
+{% if user.role == 'ADMIN_SYS' %}
+<!-- Supervision section for Admin Sys -->
+<div style="margin-top: 3rem; margin-bottom: 2.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h3 class="section-title">Courbes de Supervision</h3>
+            <p style="color: var(--text-muted); margin-top: 0.35rem; font-size: 0.95rem;">
+                Consommation et métriques de performance de l'infrastructure en temps réel.
+            </p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <select id="vm-selector" class="monitoring-select">
+                <option value="">Toutes les VMs (flotte)</option>
+            </select>
+            <select id="period-selector" class="monitoring-select">
+                <option value="7" selected>7 derniers jours</option>
+                <option value="14">14 derniers jours</option>
+                <option value="30">30 derniers jours</option>
+            </select>
+            <span style="color: var(--text-muted); font-size: 0.85rem;" id="vm-last-update">Mise à jour: en cours...</span>
+        </div>
+    </div>
+
+    <!-- Charts Row 1: CPU & RAM curves -->
+    <div class="monitoring-charts-grid">
+        <div class="glass-card chart-card">
+            <h3 class="chart-title">Consommation CPU (%)</h3>
+            <p class="chart-subtitle">Courbe horaire — moyenne sur la période</p>
+            <div class="chart-container">
+                <canvas id="cpuChart"></canvas>
+            </div>
+        </div>
+        <div class="glass-card chart-card">
+            <h3 class="chart-title">Consommation RAM (%)</h3>
+            <p class="chart-subtitle">Courbe horaire — moyenne sur la période</p>
+            <div class="chart-container">
+                <canvas id="ramChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2: Daily spikes & Log alerts -->
+    <div class="monitoring-charts-grid">
+        <div class="glass-card chart-card">
+            <h3 class="chart-title">Pics quotidiens CPU & RAM</h3>
+            <p class="chart-subtitle">Maximum enregistré par jour</p>
+            <div class="chart-container">
+                <canvas id="dailySpikesChart"></canvas>
+            </div>
+        </div>
+        <div class="glass-card chart-card">
+            <h3 class="chart-title">Alertes système par jour</h3>
+            <p class="chart-subtitle">Seuils dépassés (CPU ≥ 70%, RAM ≥ 70%, Disque ≥ 90%)</p>
+            <div class="chart-container">
+                <canvas id="logAlertsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 3: Averages comparison -->
+    <div class="monitoring-charts-grid monitoring-charts-grid-single">
+        <div class="glass-card chart-card">
+            <h3 class="chart-title">Moyennes quotidiennes</h3>
+            <p class="chart-subtitle">CPU, RAM et Disque — moyenne journalière</p>
+            <div class="chart-container chart-container-wide">
+                <canvas id="dailyAvgChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    /* ── Hero Card ── */
+    .hero-blob {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .hero-blob-orange {
+        top: -50px; right: -50px;
+        width: 250px; height: 250px;
+        background: radial-gradient(circle, rgba(232, 130, 58, 0.15) 0%, transparent 70%);
+    }
+    .hero-blob-blue {
+        bottom: -50px; left: 10%;
+        width: 200px; height: 200px;
+        background: radial-gradient(circle, rgba(29, 79, 168, 0.2) 0%, transparent 70%);
+    }
+    .hero-greeting {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-main);
+        font-weight: 800;
+        font-size: 2rem;
+        letter-spacing: -0.02em;
+    }
+    .hero-role-badge {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        backdrop-filter: blur(8px);
+    }
+    .hero-role-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+    }
+    .hero-role-value {
+        color: var(--text-main);
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .hero-role-dot {
+        display: inline-block;
+        width: 8px; height: 8px;
+        background: #4ade80;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(74,222,128,0.5);
+        flex-shrink: 0;
+    }
+
+    /* ── Section Title ── */
+    .section-title {
+        margin: 0;
+        color: var(--text-main);
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    /* ── Module Cards ── */
+    .module-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border);
+        border-radius: 1.25rem;
+        padding: 2rem;
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-start;
+        text-decoration: none;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .module-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, var(--border-light) 0%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .module-card:hover {
+        transform: translateY(-5px) scale(1.01);
+        border-color: var(--orange);
+        box-shadow: 
+            0 0 0 1px var(--border-light) inset,
+            0 32px 70px rgba(232, 130, 58, 0.12),
+            0 10px 30px var(--border-blue);
+    }
+    
+    .module-card:hover::before {
+        opacity: 1;
+    }
+
+    .module-card-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 18px;
+        border: 1px solid transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .module-card-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .module-card-content h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-main);
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+    }
+
+    .module-card-content p {
+        margin: 0 0 1.5rem 0;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        flex: 1;
+    }
+
+    .module-card-footer {
+        display: flex;
+        align-items: center;
+        opacity: 0.8;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    
+    .module-card:hover .module-card-footer {
+        opacity: 1;
+        transform: translateX(4px);
+    }
+
+    .module-card-link {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    .module-card-link.orange    { color: #E8823A; }
+    .module-card-link.blue      { color: var(--blue); }
+    .module-card-link.green     { color: #22c55e; }
+    .module-card-link.lightblue { color: var(--blue-light); }
+    
+    @media (max-width: 768px) {
+        .module-card {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .module-card-icon {
+            width: 56px;
+            height: 56px;
+        }
+    }
+
+    /* Charts styles */
+    .monitoring-charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .monitoring-charts-grid-single {
+        grid-template-columns: 1fr;
+    }
+    .chart-card {
+        padding: 1.5rem;
+    }
+    .chart-title {
+        margin: 0 0 0.25rem 0;
+        color: var(--text-main);
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+    .chart-subtitle {
+        margin: 0 0 1rem 0;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+    .chart-container {
+        position: relative;
+        height: 280px;
+    }
+    .chart-container-wide {
+        height: 320px;
+    }
+    .monitoring-select {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+</style>
+{% endif %}
+
+{% if show_users_table or show_logs_table %}
+<div class="glass-card" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+        Recherche &amp; Filtres
+    </h3>
+    <form method="get" action="{% url 'dashboard' %}">
+        <input type="hidden" name="view" value="{{ request.GET.view|default:'users' }}">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>{{ filter_form.q.label }}</label>
+                {{ filter_form.q }}
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>{{ filter_form.role.label }}</label>
+                {{ filter_form.role }}
+            </div>
+            {% if show_users_table %}
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>{{ filter_form.statut.label }}</label>
+                {{ filter_form.statut }}
+            </div>
+            {% endif %}
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn" style="flex: 1; justify-content: center;">Filtrer</button>
+                <a href="{% url 'dashboard' %}?view={{ request.GET.view|default:'users' }}" class="btn btn-ghost" style="flex: 1; justify-content: center;">Réinitialiser</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+{% if show_users_table %}
+<div class="glass-card">
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    <a href="{{ sort_urls.matricule }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                        Matricule
+                        {% if sort_by == 'matricule' %}&uarr;{% elif sort_by == '-matricule' %}&darr;{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ sort_urls.first_name }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                        Nom Complet
+                        {% if sort_by == 'first_name' %}&uarr;{% elif sort_by == '-first_name' %}&darr;{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ sort_urls.email }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                        Email
+                        {% if sort_by == 'email' %}&uarr;{% elif sort_by == '-email' %}&darr;{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ sort_urls.departement }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                        Département
+                        {% if sort_by == 'departement' %}&uarr;{% elif sort_by == '-departement' %}&darr;{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ sort_urls.role }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                        Rôle
+                        {% if sort_by == 'role' %}&uarr;{% elif sort_by == '-role' %}&darr;{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ sort_urls.is_active }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem;">
+                        Statut
+                        {% if sort_by == 'is_active' %}&uarr;{% elif sort_by == '-is_active' %}&darr;{% endif %}
+                    </a>
+                </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td><span class="mono-code">{{ u.matricule }}</span></td>
+                <td>{{ u.first_name }} {{ u.last_name }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.departement|default:"-" }}</td>
+                <td>
+                    <span class="badge {{ u.role|lower }}">{{ u.role }}</span>
+                </td>
+                <td>
+                    {% if u.is_active %}
+                        <span class="badge badge-active">Actif</span>
+                    {% else %}
+                        <span class="badge badge-inactive">Inactif</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if can_manage_users %}
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a href="{% url 'user_update' u.pk %}" class="btn btn-sm">Modifier</a>
+                        <form action="{% url 'user_toggle_active' u.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            {% if u.is_active %}
+                                <button type="submit" class="btn danger btn-sm">Désactiver</button>
+                            {% else %}
+                                <button type="submit" class="btn success btn-sm">Activer</button>
+                            {% endif %}
+                        </form>
+                    </div>
+                    {% else %}
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Lecture seule</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted);">Aucun utilisateur trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    {% include 'pagination.html' %}
+</div>
+{% endif %}
+
+{% if show_logs_table %}
+<div class="glass-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Utilisateur</th>
+                <th>Rôle</th>
+                <th>Action</th>
+                <th>Page / Détails</th>
+                <th>Date &amp; Heure</th>
+                <th>Adresse IP</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>
+                    {% if log.user %}
+                    <span style="font-weight: 600;">{{ log.user.get_full_name }}</span>
+                    <br><span class="mono-code" style="font-size: 0.8rem;">{{ log.user.matricule }}</span>
+                    {% else %}
+                    <span style="color: var(--text-muted);">Visiteur anonyme</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if log.user %}
+                    <span class="badge {{ log.user.role|lower }}">{{ log.user.role }}</span>
+                    {% else %}
+                    —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if log.action == 'LOGIN' %}
+                    <span class="badge" style="background: rgba(34, 197, 94, 0.12); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.25);">Connexion</span>
+                    {% elif log.action == 'LOGOUT' %}
+                    <span class="badge" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.22);">Déconnexion</span>
+                    {% elif log.action == 'ACTION' %}
+                    <span class="badge" style="background: rgba(242, 169, 60, 0.15); color: #F2A93C; border: 1px solid rgba(242, 169, 60, 0.3);">Action</span>
+                    {% else %}
+                    <span class="badge" style="background: rgba(29, 79, 168, 0.18); color: #90b8f8; border: 1px solid rgba(29, 79, 168, 0.3);">Accès Page</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span style="font-family: monospace; font-size: 0.88rem; word-break: break-all; color: var(--text-main);">{{ log.path }}</span>
+                    {% if log.description %}
+                    <br><span style="font-size: 0.8rem; color: var(--text-muted);">{{ log.description }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span style="font-size: 0.9rem; font-weight: 500;">{{ log.created_at|date:"d M Y" }}</span>
+                    <br><span style="font-size: 0.8rem; color: var(--text-muted);">{{ log.created_at|date:"H:i:s" }}</span>
+                </td>
+                <td>
+                    <span class="mono-code" style="font-size: 0.85rem;">{{ log.ip_address|default:"—" }}</span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">Aucun log d'activité enregistré.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    {% include 'pagination.html' %}
+</div>
+{% endif %}
+
+<style>
+    .mono-code {
+        font-family: monospace;
+        color: var(--blue-light);
+    }
+    [data-theme="light"] .mono-code {
+        color: var(--blue);
+    }
+    .badge-active {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    [data-theme="dark"] .badge-active {
+        color: #6ee7b7;
+    }
+    .badge-inactive {
+        background: rgba(239, 68, 68, 0.12);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.22);
+    }
+    [data-theme="dark"] .badge-inactive {
+        color: #fca5a5;
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if user.role == 'ADMIN_SYS' %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const isDark = () => document.documentElement.getAttribute('data-theme') !== 'light';
+    const chartColors = {
+        cpu: '#E8823A',
+        ram: '#1D4FA8',
+        disk: '#22c55e',
+        logs: '#f87171',
+        grid: () => isDark() ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+        text: () => isDark() ? '#94a3b8' : '#64748b',
+    };
+
+    let cpuChart, ramChart, dailySpikesChart, logAlertsChart, dailyAvgChart;
+    let vmList = [];
+
+    function getChartDefaults() {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: chartColors.text() }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: chartColors.text(), maxTicksLimit: 10 },
+                    grid: { color: chartColors.grid() }
+                },
+                y: {
+                    ticks: { color: chartColors.text() },
+                    grid: { color: chartColors.grid() },
+                    beginAtZero: true
+                }
+            }
+        };
+    }
+
+    function initCharts() {
+        const cpuCtx = document.getElementById('cpuChart').getContext('2d');
+        cpuChart = new Chart(cpuCtx, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'CPU %', data: [], borderColor: chartColors.cpu, backgroundColor: chartColors.cpu + '33', fill: true, tension: 0.3, pointRadius: 2 }] },
+            options: getChartDefaults()
+        });
+
+        const ramCtx = document.getElementById('ramChart').getContext('2d');
+        ramChart = new Chart(ramCtx, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'RAM %', data: [], borderColor: chartColors.ram, backgroundColor: chartColors.ram + '33', fill: true, tension: 0.3, pointRadius: 2 }] },
+            options: getChartDefaults()
+        });
+
+        const spikesCtx = document.getElementById('dailySpikesChart').getContext('2d');
+        dailySpikesChart = new Chart(spikesCtx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'Pic CPU', data: [], backgroundColor: chartColors.cpu + 'cc', borderRadius: 4 },
+                    { label: 'Pic RAM', data: [], backgroundColor: chartColors.ram + 'cc', borderRadius: 4 }
+                ]
+            },
+            options: getChartDefaults()
+        });
+
+        const logsCtx = document.getElementById('logAlertsChart').getContext('2d');
+        logAlertsChart = new Chart(logsCtx, {
+            type: 'bar',
+            data: { labels: [], datasets: [{ label: 'Alertes', data: [], backgroundColor: chartColors.logs + 'cc', borderRadius: 4 }] },
+            options: getChartDefaults()
+        });
+
+        const avgCtx = document.getElementById('dailyAvgChart').getContext('2d');
+        dailyAvgChart = new Chart(avgCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'Moy. CPU', data: [], borderColor: chartColors.cpu, tension: 0.3, pointRadius: 3 },
+                    { label: 'Moy. RAM', data: [], borderColor: chartColors.ram, tension: 0.3, pointRadius: 3 },
+                    { label: 'Moy. Disque', data: [], borderColor: chartColors.disk, tension: 0.3, pointRadius: 3 }
+                ]
+            },
+            options: getChartDefaults()
+        });
+    }
+
+    function formatDate(isoDate) {
+        if (!isoDate) return '';
+        const d = new Date(isoDate);
+        return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+    }
+
+    function formatHour(hourStr) {
+        if (!hourStr) return '';
+        const parts = hourStr.split(' ');
+        if (parts.length < 2) return hourStr;
+        return parts[1].slice(0, 5);
+    }
+
+    function updateCharts(data) {
+        const hourly = data.hourly || [];
+        const daily = data.daily || [];
+
+        const hourLabels = hourly.map(h => formatHour(h.hour));
+        cpuChart.data.labels = hourLabels;
+        cpuChart.data.datasets[0].data = hourly.map(h => h.avg_cpu);
+        cpuChart.update();
+
+        ramChart.data.labels = hourLabels;
+        ramChart.data.datasets[0].data = hourly.map(h => h.avg_ram);
+        ramChart.update();
+
+        const dayLabels = daily.map(d => formatDate(d.date));
+        dailySpikesChart.data.labels = dayLabels;
+        dailySpikesChart.data.datasets[0].data = daily.map(d => d.max_cpu);
+        dailySpikesChart.data.datasets[1].data = daily.map(d => d.max_ram);
+        dailySpikesChart.update();
+
+        logAlertsChart.data.labels = dayLabels;
+        logAlertsChart.data.datasets[0].data = daily.map(d => d.log_alerts);
+        logAlertsChart.update();
+
+        dailyAvgChart.data.labels = dayLabels;
+        dailyAvgChart.data.datasets[0].data = daily.map(d => d.avg_cpu);
+        dailyAvgChart.data.datasets[1].data = daily.map(d => d.avg_ram);
+        dailyAvgChart.data.datasets[2].data = daily.map(d => d.avg_disk || 0);
+        dailyAvgChart.update();
+    }
+
+    function populateVMSelector(vms) {
+        const selector = document.getElementById('vm-selector');
+        if (!selector) return;
+        const current = selector.value;
+        selector.innerHTML = '<option value="">Toutes les VMs (flotte)</option>';
+        vms.forEach(vm => {
+            const opt = document.createElement('option');
+            opt.value = vm.id;
+            opt.textContent = vm.hostname;
+            selector.appendChild(opt);
+        });
+        if (current) selector.value = current;
+    }
+
+    function fetchSummary() {
+        const days = document.getElementById('period-selector').value;
+        const vmSelector = document.getElementById('vm-selector');
+        const vmId = vmSelector ? vmSelector.value : '';
+        const url = vmId
+            ? `/api/vm/${vmId}/metrics/summary/?days=${days}`
+            : `/api/vm/metrics/summary/?days=${days}`;
+
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                updateCharts(data);
+                document.getElementById('vm-last-update').innerText = "Dernière mise à jour : " + new Date().toLocaleTimeString();
+            })
+            .catch(err => {
+                console.error("Error fetching summary:", err);
+                document.getElementById('vm-last-update').innerText = "Erreur de connexion";
+            });
+    }
+
+    function fetchVMList() {
+        fetch('/api/vm/')
+            .then(r => r.json())
+            .then(data => {
+                vmList = data;
+                populateVMSelector(data);
+            })
+            .catch(err => console.error("Error fetching VMs:", err));
+    }
+
+    initCharts();
+    fetchVMList();
+    fetchSummary();
+
+    const vmSelector = document.getElementById('vm-selector');
+    if (vmSelector) vmSelector.addEventListener('change', fetchSummary);
+    document.getElementById('period-selector').addEventListener('change', fetchSummary);
+    setInterval(() => { fetchVMList(); fetchSummary(); }, 30000);
+});
+</script>
+{% endif %}
+{% endblock %}

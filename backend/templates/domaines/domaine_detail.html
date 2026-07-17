@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ domaine.nom }} — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <h1>{{ domaine.nom }}</h1>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{% url 'domaine_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+            <a href="{% url 'domaine_update' domaine.pk %}" class="btn">Modifier</a>
+          
+        </div>
+    </div>
+
+    <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+            Informations du domaine
+        </h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Registrar</div>
+                <div>{{ domaine.registrar }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">DNS</div>
+                <div>{{ domaine.dns }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Responsable</div>
+                <div>{{ domaine.responsable }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Date d'achat</div>
+                <div>{{ domaine.date_achat|date:"d/m/Y" }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Date d'expiration</div>
+                <div>{{ domaine.date_expiration|date:"d/m/Y" }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Renouvellement auto.</div>
+                <div>{{ domaine.renouvellement_auto|yesno:"Oui,Non" }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

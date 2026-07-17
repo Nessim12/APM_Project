@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Alertes SSL — APM{% endblock %}
+
+{% block content %}
+<div class="header-row">
+    <h1>Alertes & notifications SSL</h1>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{% url 'ssl_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour SSL</a>
+        {% if notifications %}
+        <form method="post" action="{% url 'ssl_notifications_mark_all_read' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn">Tout marquer comme lu</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="glass-card">
+    {% for notification in notifications %}
+    <div style="padding: 1.25rem 0; border-bottom: 1px solid var(--border); {% if not notification.lue %}background: rgba(59, 130, 246, 0.05); margin: 0 -1.5rem; padding-left: 1.5rem; padding-right: 1.5rem;{% endif %}">
+        <div style="display: flex; justify-content: space-between; gap: 1rem; align-items: start; flex-wrap: wrap;">
+            <div style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                    {% if notification.niveau == 'EXPIRE' %}
+                        <span class="badge admin">{{ notification.get_niveau_display }}</span>
+                    {% elif notification.niveau == 'J30' %}
+                        <span class="badge tech">{{ notification.get_niveau_display }}</span>
+                    {% else %}
+                        <span class="badge membre">{{ notification.get_niveau_display }}</span>
+                    {% endif %}
+                    {% if not notification.lue %}
+                        <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #93c5fd;">Non lue</span>
+                    {% endif %}
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">{{ notification.created_at|date:"d/m/Y H:i" }}</span>
+                </div>
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem;">{{ notification.titre }}</h3>
+                <pre style="white-space: pre-wrap; font-family: inherit; margin: 0; color: var(--text-muted); line-height: 1.6;">{{ notification.message }}</pre>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                {% if notification.certificat %}
+                <a href="{% url 'ssl_detail' notification.certificat.pk %}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Voir certificat</a>
+                {% endif %}
+                {% if not notification.lue %}
+                <form method="post" action="{% url 'ssl_notification_mark_read' notification.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn success" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Marquer lue</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p style="text-align: center; color: var(--text-muted); margin: 0;">Aucune notification SSL pour le moment.</p>
+    {% endfor %}
+</div>
+{% endblock %}

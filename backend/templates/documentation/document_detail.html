@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ document.nom }} — Documentation — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <div>
+            <h1 style="margin-bottom: 0.3rem;">{{ document.nom }}</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Aperçu, visualisation et téléchargement du fichier.</p>
+        </div>
+        <div class="doc-detail-actions">
+            <a href="{% url 'document_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+            <a href="{% url 'document_preview' document.pk %}" class="btn doc-action-btn preview" target="_blank" rel="noopener">👁 Voir</a>
+            <a href="{% url 'document_download' document.pk %}" class="btn doc-action-btn download">⬇ Télécharger</a>
+            <a href="{% url 'document_update' document.pk %}" class="btn">Modifier</a>
+            <a href="{% url 'document_delete' document.pk %}" class="btn danger">Supprimer</a>
+        </div>
+    </div>
+
+    <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+            Aperçu
+        </h3>
+        <div class="doc-preview-shell">
+            {% if document.preview_mode == 'pdf' %}
+            <object data="{% url 'document_preview' document.pk %}" type="application/pdf" class="doc-preview-frame">
+                <div class="doc-preview-empty">
+                    <strong>Le PDF ne s'affiche pas dans ce navigateur.</strong>
+                    <p>Utilisez Voir pour ouvrir le fichier dans un nouvel onglet, ou Télécharger pour l'enregistrer localement.</p>
+                    <div class="doc-preview-empty-actions">
+                        <a href="{% url 'document_preview' document.pk %}" class="btn doc-action-btn preview" target="_blank" rel="noopener">Voir</a>
+                        <a href="{% url 'document_download' document.pk %}" class="btn doc-action-btn download">Télécharger</a>
+                    </div>
+                </div>
+            </object>
+            {% elif document.preview_mode == 'image' %}
+            <img src="{% url 'document_preview' document.pk %}" alt="Aperçu de {{ document.nom }}" class="doc-preview-image">
+            {% elif document.preview_mode == 'text' %}
+            <iframe src="{% url 'document_preview' document.pk %}" title="Aperçu du document" class="doc-preview-frame"></iframe>
+            {% else %}
+            <div class="doc-preview-empty">
+                <strong>Pas d'aperçu natif pour ce format.</strong>
+                <p>Le fichier reste disponible en visualisation via Voir ou en téléchargement via Télécharger.</p>
+                <div class="doc-preview-empty-actions">
+                    <a href="{% url 'document_preview' document.pk %}" class="btn doc-action-btn preview" target="_blank" rel="noopener">Voir</a>
+                    <a href="{% url 'document_download' document.pk %}" class="btn doc-action-btn download">Télécharger</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <div class="doc-detail-header">
+            <span class="doc-detail-icon">{{ document.icone_fichier }}</span>
+            <div>
+                <div class="doc-card-meta" style="margin-bottom: 0.75rem;">
+                    <span class="badge">{{ document.get_categorie_display }}</span>
+                    <span class="badge tech">{{ document.get_type_gestion_display }}</span>
+                    <span class="doc-type-label">{{ document.type_fichier|upper }}</span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">
+                    {{ document.taille_lisible }} · Téléversé le {{ document.date_upload|date:"d/m/Y à H:i" }}
+                    {% if document.uploaded_by %}
+                    · par {{ document.uploaded_by.get_full_name }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+            Métadonnées
+        </h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Module de gestion</div>
+                <div>{{ document.get_type_gestion_display }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Entité liée</div>
+                <div>
+                    {% if document.get_related_url %}
+                    <a href="{{ document.get_related_url }}">{{ document.get_related_label }}</a>
+                    {% else %}
+                    {{ document.get_related_label }}
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Catégorie</div>
+                <div>{{ document.get_categorie_display }}</div>
+            </div>
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Type de fichier</div>
+                <div>{{ document.type_fichier|upper }}</div>
+            </div>
+            {% if document.application %}
+            <div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">ID Application</div>
+                <div style="font-family: monospace; font-size: 0.85rem;">{{ document.application_id }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% if document.description %}
+        <div style="margin-top: 1.5rem;">
+            <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.3rem;">Description</div>
+            <div style="line-height: 1.6;">{{ document.description|linebreaksbr }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

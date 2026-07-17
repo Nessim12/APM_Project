@@ -1,0 +1,571 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Connexion — APM · TOPNET{% endblock %}
+
+{% block content %}
+<div class="login-split-page">
+
+    <!-- ░░ LEFT PANEL — Branding ░░ -->
+    <div class="login-brand-panel">
+        <div class="login-brand-glow login-brand-glow-1"></div>
+        <div class="login-brand-glow login-brand-glow-2"></div>
+
+        <div class="login-brand-content">
+
+            <!-- Topnet Logo (inline SVG) -->
+            <div class="topnet-logo-wrap">
+                <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" aria-label="Topnet Logo" role="img">
+                  <defs>
+                    <linearGradient id="orbGrad" x1="15%" y1="10%" x2="90%" y2="95%">
+                      <stop offset="0%"   stop-color="#122A6B"/>
+                      <stop offset="30%"  stop-color="#1D4FA8"/>
+                      <stop offset="62%"  stop-color="#2E7FD6"/>
+                      <stop offset="82%"  stop-color="#E8823A"/>
+                      <stop offset="100%" stop-color="#F2A93C"/>
+                    </linearGradient>
+                    <radialGradient id="sheen" cx="30%" cy="22%" r="55%">
+                      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.55"/>
+                      <stop offset="45%"  stop-color="#FFFFFF" stop-opacity="0.08"/>
+                      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+                    </radialGradient>
+                    <radialGradient id="rim" cx="50%" cy="50%" r="50%">
+                      <stop offset="82%"  stop-color="#000000" stop-opacity="0"/>
+                      <stop offset="100%" stop-color="#0B1B3F"  stop-opacity="0.45"/>
+                    </radialGradient>
+                    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%"   stop-color="#12305F"/>
+                      <stop offset="100%" stop-color="#1D4FA8"/>
+                    </linearGradient>
+                    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+                      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0B1B3F" flood-opacity="0.28"/>
+                    </filter>
+                  </defs>
+                  <!-- Orb -->
+                  <g transform="translate(150,150)" filter="url(#softShadow)">
+                    <circle r="108" fill="url(#orbGrad)"/>
+                    <circle r="108" fill="url(#sheen)"/>
+                    <circle r="108" fill="url(#rim)"/>
+                    <g transform="rotate(-6)">
+                      <rect x="-56" y="-46" width="112" height="30" rx="10" fill="#FFFFFF"/>
+                      <rect x="-15" y="-46" width="30"  height="98" rx="10" fill="#FFFFFF"/>
+                    </g>
+                  </g>
+                  <!-- Orbit accent arc -->
+                  <path d="M 42 150 A 108 108 0 0 1 150 42" fill="none" stroke="#F2A93C" stroke-width="4" stroke-linecap="round" opacity="0.85"/>
+                  <!-- Wordmark -->
+                  <g transform="translate(300,0)">
+                    <text x="0" y="145" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="90" letter-spacing="0.5" fill="url(#textGrad)">TOP<tspan fill="#E8823A">NET</tspan></text>
+                    <rect x="4" y="164" width="486" height="6" rx="3" fill="#F2A93C"/>
+                    <text x="4" y="200" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="20" letter-spacing="5" fill="#5B7290">CONNECTED. RELIABLE. FORWARD.</text>
+                  </g>
+                </svg>
+            </div>
+
+            <!-- Divider -->
+            <div class="login-brand-divider"></div>
+
+            <!-- Title & subtitle -->
+            <h1 class="login-brand-title">APM Project</h1>
+            <p class="login-brand-subtitle">
+                Plateforme de gestion des applications,<br>
+                environnements et ressources TOPNET.
+            </p>
+
+            <!-- Feature chips -->
+            <div class="login-brand-chips">
+                <span class="login-chip">🖥 Applications</span>
+                <span class="login-chip">🌐 Domaines</span>
+                <span class="login-chip">🔒 SSL</span>
+                <span class="login-chip">📄 Contrats</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ░░ RIGHT PANEL — Login form ░░ -->
+    <div class="login-form-panel">
+        <div class="login-form-card">
+
+            <!-- Header -->
+            <div class="login-form-header">
+                <div class="login-lock-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div>
+                    <h2 class="login-form-title">Connexion</h2>
+                    <p class="login-form-subtitle">Connectez-vous à votre espace</p>
+                </div>
+            </div>
+
+            <!-- Error -->
+            {% if auth_error_message %}
+            <div class="login-alert-error" role="alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {{ auth_error_message }}
+            </div>
+            {% endif %}
+
+            <!-- Form -->
+            <form method="post" novalidate class="login-form" id="loginForm">
+                {% csrf_token %}
+
+                <!-- Username -->
+                <div class="login-field">
+                    <label for="id_username" class="login-label">Matricule ou Email</label>
+                    <div class="login-input-wrap">
+                        <svg class="login-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <input
+                            type="text"
+                            name="username"
+                            id="id_username"
+                            class="login-input"
+                            placeholder="TOPNET_1  ou  votre@email.com"
+                            autofocus
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="login-field">
+                    <div class="login-label-row">
+                        <label for="id_password" class="login-label">Mot de passe</label>
+                        <a href="{% url 'password_reset' %}" class="login-forgot-link">Mot de passe oublié ?</a>
+                    </div>
+                    <div class="login-input-wrap">
+                        <svg class="login-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <input
+                            type="password"
+                            name="password"
+                            id="id_password"
+                            class="login-input"
+                            placeholder="••••••••••"
+                            autocomplete="current-password"
+                            required
+                        >
+                        <button type="button" class="login-eye-btn" onclick="togglePassword()" aria-label="Afficher/masquer le mot de passe">
+                            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CAPTCHA -->
+                <div class="login-field" style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+                    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                    <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="login-submit-btn" id="loginSubmit">
+                    <span class="lsb-text">Se connecter</span>
+                    <span class="lsb-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </span>
+                </button>
+            </form>
+
+            <!-- Legal notice -->
+            <div class="login-legal">
+                Plateforme réservée aux agents TOPNET.<br>
+                Tout accès non autorisé est interdit.
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ───────────────────── STYLES ───────────────────── -->
+<style>
+    /* ── Reset ── */
+    .main-content { padding: 0 !important; }
+
+    /* ── Root split ── */
+    .login-split-page {
+        display: flex;
+        min-height: 100vh;
+        width: 100%;
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    /* ══════════════════════════
+       LEFT — BRAND PANEL
+    ══════════════════════════ */
+    .login-brand-panel {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: var(--bg-body); /* Adapt to light/dark mode */
+        padding: 3.5rem 3rem;
+    }
+
+    /* Ambient glows — use Topnet brand colors */
+    .login-brand-glow {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        pointer-events: none;
+    }
+    .login-brand-glow-1 {
+        width: 480px; height: 480px;
+        background: radial-gradient(circle, rgba(29,79,168,.30), transparent 70%);
+        top: -120px; left: -100px;
+        animation: glowPulse 7s ease-in-out infinite alternate;
+    }
+    .login-brand-glow-2 {
+        width: 360px; height: 360px;
+        background: radial-gradient(circle, rgba(232,130,58,.22), transparent 70%);
+        bottom: -80px; right: -60px;
+        animation: glowPulse 9s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes glowPulse {
+        from { opacity: .55; transform: scale(1); }
+        to   { opacity: 1;   transform: scale(1.14); }
+    }
+
+    .login-brand-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.75rem;
+        text-align: center;
+        max-width: 440px;
+        width: 100%;
+    }
+
+    /* Logo */
+    .topnet-logo-wrap {
+        width: 100%;
+        animation: logoFloat 5s ease-in-out infinite;
+        filter: drop-shadow(0 10px 32px rgba(29,79,168,.45));
+    }
+    .topnet-logo-wrap svg { width: 100%; height: auto; display: block; }
+    @keyframes logoFloat {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(-10px); }
+    }
+
+    /* Divider — orange from palette */
+    .login-brand-divider {
+        width: 56px;
+        height: 3px;
+        border-radius: 99px;
+        background: linear-gradient(to right, #1D4FA8, #E8823A);
+    }
+
+    /* Brand title */
+    .login-brand-title {
+        font-size: clamp(1.6rem, 2.2vw, 2rem);
+        font-weight: 800;
+        letter-spacing: -.02em;
+        margin: 0;
+        color: var(--text-main);
+    }
+
+    /* Brand subtitle */
+    .login-brand-subtitle {
+        color: var(--text-muted);
+        font-size: .93rem;
+        line-height: 1.75;
+        margin: 0;
+    }
+
+    /* Feature chips */
+    .login-brand-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+        justify-content: center;
+    }
+    .login-chip {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: .38rem .9rem;
+        font-size: .78rem;
+        color: var(--text-muted);
+        backdrop-filter: blur(6px);
+        transition: background .2s, border-color .2s, transform .2s;
+    }
+    .login-chip:hover {
+        background: rgba(232,130,58,.10);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    /* ══════════════════════════
+       RIGHT — FORM PANEL
+    ══════════════════════════ */
+    .login-form-panel {
+        flex: 0 0 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2.5rem;
+        background: var(--bg-body);
+        backdrop-filter: blur(20px);
+        border-left: 1px solid var(--border);
+    }
+
+    /* Card */
+    .login-form-card {
+        width: 100%;
+        max-width: 420px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 1.4rem;
+        padding: 2.5rem 2.25rem;
+        box-shadow: var(--card-shadow);
+    }
+
+    /* Header */
+    .login-form-header {
+        display: flex;
+        align-items: center;
+        gap: .9rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .login-lock-icon {
+        width: 50px; height: 50px;
+        flex-shrink: 0;
+        border-radius: .9rem;
+        /* orange-to-blue gradient matching Topnet palette */
+        background: linear-gradient(135deg, #1D4FA8, #E8823A);
+        display: flex; align-items: center; justify-content: center;
+        color: #ffffff;
+        box-shadow: 0 6px 20px rgba(232,130,58,.30);
+    }
+    .login-form-title {
+        font-size: 1.55rem;
+        font-weight: 700;
+        margin: 0 0 .2rem 0;
+        color: var(--text-main);
+    }
+    .login-form-subtitle {
+        font-size: .88rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    /* Error */
+    .login-alert-error {
+        display: flex;
+        align-items: center;
+        gap: .55rem;
+        background: rgba(232,82,58,.08);
+        border: 1px solid rgba(232,82,58,.25);
+        border-left: 3px solid #E8823A;
+        border-radius: .65rem;
+        padding: .8rem 1rem;
+        color: #fca5a5;
+        font-size: .85rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Form layout */
+    .login-form { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    /* Field */
+    .login-field { display: flex; flex-direction: column; gap: .42rem; }
+    .login-label-row { display: flex; align-items: center; justify-content: space-between; }
+    .login-label {
+        font-size: .76rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: .07em;
+    }
+    .login-forgot-link {
+        font-size: .78rem;
+        color: #F2A93C;
+        text-decoration: none;
+        transition: color .2s;
+    }
+    .login-forgot-link:hover { color: #fbbf74; }
+
+    /* Input */
+    .login-input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .login-input-icon {
+        position: absolute;
+        left: .95rem;
+        width: 16px; height: 16px;
+        color: #334155;
+        pointer-events: none;
+        flex-shrink: 0;
+        transition: color .25s;
+    }
+    .login-input-wrap:focus-within .login-input-icon { color: #E8823A; }
+
+    .login-input {
+        width: 100%;
+        background: var(--bg-body);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        padding: .9rem 2.9rem .9rem 2.75rem;
+        border-radius: .72rem;
+        font-size: .92rem;
+        font-family: inherit;
+        transition: border-color .22s, background .22s, box-shadow .22s;
+    }
+    .login-input::placeholder { color: var(--text-muted); }
+    .login-input:focus {
+        outline: none;
+        border-color: var(--accent);
+        background: var(--bg-body);
+        box-shadow: 0 0 0 3px rgba(232,130,58,.12);
+    }
+
+    /* Eye toggle */
+    .login-eye-btn {
+        position: absolute;
+        right: .85rem;
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: .25rem;
+        display: flex;
+        align-items: center;
+        transition: color .2s;
+    }
+    .login-eye-btn:hover { color: var(--text-main); }
+
+    /* Submit */
+    .login-submit-btn {
+        width: 100%;
+        margin-top: .4rem;
+        padding: .9rem 1.4rem;
+        border: none;
+        border-radius: .72rem;
+        background: linear-gradient(135deg, #1D4FA8 0%, #2E7FD6 50%, #E8823A 100%);
+        background-size: 200% 100%;
+        background-position: 0% 0%;
+        color: #fff;
+        font-size: .95rem;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .6rem;
+        transition: background-position .45s ease, box-shadow .25s, transform .2s;
+        box-shadow: 0 4px 22px rgba(29,79,168,.40);
+        letter-spacing: .01em;
+    }
+    .login-submit-btn:hover {
+        background-position: 100% 0%;
+        box-shadow: 0 8px 28px rgba(232,130,58,.38);
+        transform: translateY(-2px);
+    }
+    .login-submit-btn:active { transform: translateY(0); }
+    .lsb-text { flex: 1; text-align: center; }
+    .lsb-arrow {
+        width: 30px; height: 30px;
+        border-radius: .45rem;
+        background: rgba(255,255,255,.18);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        transition: background .2s;
+        background: rgba(255,255,255,.2);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* Legal notice */
+    .login-legal {
+        margin-top: 1.75rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(255,255,255,.06);
+        text-align: center;
+        font-size: .72rem;
+        line-height: 1.75;
+        color: rgba(148,163,184,.5);
+    }
+
+    /* CAPTCHA */
+    .login-captcha-wrap {
+        display: flex;
+        gap: .65rem;
+        align-items: stretch;
+    }
+    .login-captcha-question {
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+        background: rgba(29, 79, 168, 0.12);
+        border: 1px solid rgba(29, 79, 168, 0.3);
+        border-radius: .72rem;
+        padding: .9rem 1rem;
+        flex-shrink: 0;
+        min-width: 130px;
+        justify-content: center;
+    }
+    .captcha-icon { font-size: 1rem; }
+    .captcha-text {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #E8823A;
+        letter-spacing: .04em;
+        font-family: monospace;
+    }
+
+    /* ══════════════════════════
+       RESPONSIVE
+    ══════════════════════════ */
+    @media (max-width: 900px) {
+        .login-split-page { flex-direction: column; }
+        .login-brand-panel {
+            padding: 2.5rem 2rem;
+            border-right: none;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+        .login-brand-content { max-width: 100%; }
+        .topnet-logo-wrap { max-width: 360px; }
+        .login-brand-title { font-size: 1.5rem; }
+        .login-form-panel { flex: none; width: 100%; padding: 2rem 1.5rem; }
+        .login-form-card { max-width: 100%; }
+    }
+    @media (max-width: 480px) {
+        .login-brand-panel { padding: 2rem 1.25rem; }
+        .login-form-panel { padding: 1.5rem 1rem; }
+        .login-form-card { padding: 1.75rem 1.25rem; border-radius: 1.1rem; }
+    }
+</style>
+
+<!-- ───────────────────── SCRIPT ───────────────────── -->
+<script>
+function togglePassword() {
+    const inp  = document.getElementById('id_password');
+    const icon = document.getElementById('eyeIcon');
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    icon.innerHTML = show
+        ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+}
+
+/* Loading state on submit */
+document.getElementById('loginForm').addEventListener('submit', function () {
+    const btn  = document.getElementById('loginSubmit');
+    const text = btn.querySelector('.lsb-text');
+    text.textContent = 'Connexion…';
+    btn.disabled = true;
+    btn.style.opacity = '.75';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Application — APM{% endblock %}
+
+{% block content %}
+<div class="page-centered">
+    <div class="header-row">
+        <h1>{{ action }} Application</h1>
+        <a href="{% url 'application_list' %}" class="btn" style="background: transparent; border: 1px solid var(--border);">← Retour</a>
+    </div>
+
+    <div class="glass-card">
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert error" style="margin-bottom: 1.5rem;">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label>Nom *</label>
+                {{ form.nom }}
+                {% if form.nom.errors %}<ul class="errorlist">{% for e in form.nom.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>Description *</label>
+                {{ form.description }}
+                {% if form.description.errors %}<ul class="errorlist">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>Criticité *</label>
+                    {{ form.criticite }}
+                    {% if form.criticite.errors %}<ul class="errorlist">{% for e in form.criticite.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Statut *</label>
+                    {{ form.statut }}
+                    {% if form.statut.errors %}<ul class="errorlist">{% for e in form.statut.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>Date de mise en production *</label>
+                    {{ form.date_mise_en_production }}
+                    {% if form.date_mise_en_production.errors %}<ul class="errorlist">{% for e in form.date_mise_en_production.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Date de fin de vie</label>
+                    {{ form.date_fin_vie }}
+                    {% if form.date_fin_vie.errors %}<ul class="errorlist">{% for e in form.date_fin_vie.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>Direction métier *</label>
+                    {{ form.direction_metier }}
+                    {% if form.direction_metier.errors %}<ul class="errorlist">{% for e in form.direction_metier.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Nombre d'utilisateurs *</label>
+                    {{ form.nombre_utilisateurs }}
+                    {% if form.nombre_utilisateurs.errors %}<ul class="errorlist">{% for e in form.nombre_utilisateurs.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <h3 style="margin: 2rem 0 1rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+                Sécurité
+            </h3>
+
+            <div class="form-group" style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.5rem;">
+                {{ form.has_ssl }}
+                <div>
+                    <label style="margin: 0;">Cette application nécessite un certificat SSL</label>
+                    <p style="margin: 0.35rem 0 0; color: var(--text-muted); font-size: 0.85rem;">
+                        Si coché, vous serez redirigé vers la gestion SSL pour configurer le certificat après l'enregistrement.
+                    </p>
+                </div>
+            </div>
+
+            <h3 style="margin: 2rem 0 1rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+                Environnements associés
+            </h3>
+
+            <div class="form-group">
+                <div class="env-checkbox-grid">
+                    {% for value, label in form.environnements.field.choices %}
+                        <label class="env-checkbox-card">
+                            <input type="checkbox" name="environnements" value="{{ value }}" 
+                                   {% if value in form.environnements.value or value in form.environnements.initial %}checked{% endif %}>
+                            <div class="env-checkbox-card-content">
+                                <span class="env-name">{{ label }}</span>
+                            </div>
+                        </label>
+                    {% endfor %}
+                </div>
+                {% if form.environnements.errors %}
+                    <ul class="errorlist">{% for e in form.environnements.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <h3 style="margin: 2rem 0 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+                Gouvernance — Responsable *
+            </h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>Responsable métier</label>
+                    {{ form.responsable_metier }}
+                    {% if form.responsable_metier.errors %}<ul class="errorlist">{% for e in form.responsable_metier.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+    .env-checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+    .env-checkbox-card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 0.72rem;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+    .env-checkbox-card input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .env-checkbox-card-content {
+        text-align: center;
+    }
+    .env-checkbox-card .env-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        transition: color 0.2s ease;
+    }
+    .env-checkbox-card.checked,
+    .env-checkbox-card:has(input[type="checkbox"]:checked) {
+        border-color: var(--orange);
+        background: rgba(232, 130, 58, 0.12);
+        box-shadow: 0 0 12px rgba(232, 130, 58, 0.2);
+    }
+    .env-checkbox-card.checked .env-name,
+    .env-checkbox-card:has(input[type="checkbox"]:checked) .env-name {
+        color: var(--orange-light);
+    }
+    .env-checkbox-card:hover {
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    .env-checkbox-card.checked:hover,
+    .env-checkbox-card:has(input[type="checkbox"]:checked):hover {
+        border-color: var(--orange-light);
+    }
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const cards = document.querySelectorAll('.env-checkbox-card');
+    cards.forEach(card => {
+        const cb = card.querySelector('input[type="checkbox"]');
+        const updateCard = () => {
+            if (cb.checked) {
+                card.classList.add('checked');
+            } else {
+                card.classList.remove('checked');
+            }
+        };
+        cb.addEventListener('change', updateCard);
+        updateCard(); // init
+    });
+});
+</script>
+{% endblock %}

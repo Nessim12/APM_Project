@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block title %}Fournisseurs — APM{% endblock %}
+{% block content %}
+
+<div class="header-row">
+  <div>
+    <h1>Fournisseurs</h1>
+    <p style="color:var(--text-muted);margin:0.25rem 0 0">Partenaires et prestataires liés aux contrats.</p>
+  </div>
+  <div style="display:flex;gap:0.75rem;align-items:center">
+    <a href="{% url 'contrats:fournisseur_create' %}" class="btn">+ Nouveau fournisseur</a>
+    <a href="{% url 'contrats:contrat_dashboard' %}"
+       class="btn" style="background:transparent;border:1px solid var(--border)">← Contrats</a>
+  </div>
+</div>
+
+<!-- ── Statistiques globales ─────────────────────────────────────────────── -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem">
+  <div class="glass-card" style="text-align:center;padding:1.2rem">
+    <div style="font-size:1.8rem;font-weight:700;color:#122A6B">{{ total_fournisseurs }}</div>
+    <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.25rem">Fournisseurs total</div>
+  </div>
+
+  <div class="glass-card" style="text-align:center;padding:1.2rem">
+    <div style="font-size:1.8rem;font-weight:700;color:#E8823A">{{ fournisseurs_actifs }}</div>
+    <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.25rem">Avec contrats</div>
+  </div>
+
+  <div class="glass-card" style="text-align:center;padding:1.2rem">
+    <div style="font-size:1.8rem;font-weight:700;color:#F2A93C">{{ total_contrats_fournisseurs }}</div>
+    <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.25rem">Contrats liés</div>
+  </div>
+
+  <div class="glass-card" style="text-align:center;padding:1.2rem">
+    <div style="font-size:1.4rem;font-weight:700;color:#2563EB">{{ cout_total_fournisseurs|floatformat:0 }} dt</div>
+    <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.25rem">Coût moyen/fournisseur</div>
+  </div>
+</div>
+
+<!-- Recherche -->
+<div class="glass-card" style="margin-bottom:1.5rem">
+  <form method="get" action="{% url 'contrats:fournisseur_list' %}">
+    <div style="display:flex;gap:1rem;align-items:flex-end">
+      <div class="form-group" style="margin-bottom:0;flex:1">
+        <label style="font-size:0.85rem;color:var(--text-muted)">Recherche</label>
+        <input type="text" name="q" value="{{ query }}" class="form-input"
+               placeholder="Nom, email, téléphone, responsable…">
+      </div>
+      <button type="submit" class="btn">Rechercher</button>
+      {% if query %}
+      <a href="{% url 'contrats:fournisseur_list' %}"
+         class="btn" style="background:transparent;border:1px solid var(--border)">
+        Réinitialiser
+      </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- ── Fournisseurs les plus utilisés ─────────────────────────────────────────────── -->
+<div style="margin-bottom:2rem">
+  <h2 style="font-size:1rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:1rem">
+    ⭐ Top fournisseurs
+  </h2>
+
+  {% if top_fournisseurs %}
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem">
+    {% for fournisseur in top_fournisseurs %}
+    <div class="glass-card" style="display:flex;flex-direction:column;border-left:4px solid #1D4FA8">
+      <!-- En-tête avec nom et nombre de contrats -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem">
+        <div>
+          <h3 style="margin:0;font-size:1rem;font-weight:700">{{ fournisseur.nom }}</h3>
+          <p style="margin:0.25rem 0 0;color:var(--text-muted);font-size:0.82rem">
+            {% if fournisseur.responsable %}{{ fournisseur.responsable }}{% else %}Contact non renseigné{% endif %}
+          </p>
+        </div>
+        <span class="badge" style="background:rgba(29,79,168,0.12);color:#1D4FA8;font-size:1.2rem;font-weight:700;padding:0.4rem 0.8rem">
+          {{ fournisseur.nb_contrats }}
+        </span>
+      </div>
+
+      <!-- Informations de contact compactes -->
+      <div style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;font-size:0.82rem">
+        {% if fournisseur.email %}
+        <div style="color:var(--text-muted)">
+          📧 <a href="mailto:{{ fournisseur.email }}" style="color:#2563EB;text-decoration:none">{{ fournisseur.email }}</a>
+        </div>
+        {% endif %}
+        {% if fournisseur.telephone %}
+        <div style="color:var(--text-muted)">
+          📞 {{ fournisseur.telephone }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Barre de progression -->
+      <div style="margin-bottom:1rem">
+        <div style="background:rgba(29,79,168,0.12);border-radius:12px;height:4px;overflow:hidden">
+          <div style="background:linear-gradient(90deg, #1D4FA8, #2563EB);height:100%;width:calc({{ fournisseur.nb_contrats }}/{{ max_contrats|default:1 }}*100%);border-radius:12px"></div>
+        </div>
+      </div>
+
+      <!-- Lien d'action -->
+      <a href="{% url 'contrats:fournisseur_detail' fournisseur.pk %}"
+         style="color:#1D4FA8;text-decoration:none;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:0.35rem;padding:0.4rem 0.8rem;background:rgba(29,79,168,0.08);border-radius:8px;transition:background .2s;text-align:center;justify-content:center"
+         onmouseover="this.style.background='rgba(139,92,246,0.15)'"
+         onmouseout="this.style.background='rgba(29,79,168,0.08)'">
+        Voir fournisseur
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Table -->
+<div class="glass-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Responsable</th>
+        <th>Email</th>
+        <th>Téléphone</th>
+        <th>Site web</th>
+        <th style="text-align:center">Contrats</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in fournisseurs %}
+      <tr>
+        <td style="font-weight:600">
+          <a href="{% url 'contrats:fournisseur_detail' f.pk %}" style="color:#2563EB;text-decoration:none;font-weight:600">
+            {{ f.nom }}
+          </a>
+        </td>
+        <td>{{ f.responsable|default:'—' }}</td>
+        <td>
+          {% if f.email %}
+          <a href="mailto:{{ f.email }}" style="color:#2563EB;text-decoration:none">{{ f.email }}</a>
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ f.telephone|default:'—' }}</td>
+        <td>
+          {% if f.site_web %}
+          <a href="{{ f.site_web }}" target="_blank" rel="noopener"
+             style="color:#2563EB;text-decoration:none">🔗 Visiter</a>
+          {% else %}—{% endif %}
+        </td>
+        <td style="text-align:center">
+          <span class="badge" style="background:rgba(29,79,168,0.12);color:#2563EB">
+            {{ f.nb_contrats }}
+          </span>
+        </td>
+        <td style="display:flex;gap:0.4rem;flex-wrap:wrap">
+          <a href="{% url 'contrats:fournisseur_detail' f.pk %}"
+             class="btn" style="padding:0.3rem 0.65rem;font-size:0.82rem">Voir</a>
+          <a href="{% url 'contrats:fournisseur_update' f.pk %}"
+             class="btn" style="padding:0.3rem 0.65rem;font-size:0.82rem;background:transparent;border:1px solid var(--border)">Modifier</a>
+                  <form action="{% url 'contrats:fournisseur_delete' f.pk %}" method="post"
+                    style="display:inline">
+            {% csrf_token %}
+            
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">
+          Aucun fournisseur trouvé.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% include 'pagination.html' %}
+</div>
+
+{% endblock %}
