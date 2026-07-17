@@ -84,6 +84,27 @@
                 </div>
             </div>
 
+            <h3 style="margin: 2rem 0 1rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
+                Environnements associés
+            </h3>
+
+            <div class="form-group">
+                <div class="env-checkbox-grid">
+                    {% for value, label in form.environnements.field.choices %}
+                        <label class="env-checkbox-card">
+                            <input type="checkbox" name="environnements" value="{{ value }}" 
+                                   {% if value in form.environnements.value or value in form.environnements.initial %}checked{% endif %}>
+                            <div class="env-checkbox-card-content">
+                                <span class="env-name">{{ label }}</span>
+                            </div>
+                        </label>
+                    {% endfor %}
+                </div>
+                {% if form.environnements.errors %}
+                    <ul class="errorlist">{% for e in form.environnements.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
             <h3 style="margin: 2rem 0 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;">
                 Gouvernance — Responsable *
             </h3>
@@ -102,4 +123,77 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+    .env-checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+    .env-checkbox-card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 0.72rem;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+    .env-checkbox-card input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .env-checkbox-card-content {
+        text-align: center;
+    }
+    .env-checkbox-card .env-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        transition: color 0.2s ease;
+    }
+    .env-checkbox-card.checked,
+    .env-checkbox-card:has(input[type="checkbox"]:checked) {
+        border-color: var(--orange);
+        background: rgba(232, 130, 58, 0.12);
+        box-shadow: 0 0 12px rgba(232, 130, 58, 0.2);
+    }
+    .env-checkbox-card.checked .env-name,
+    .env-checkbox-card:has(input[type="checkbox"]:checked) .env-name {
+        color: var(--orange-light);
+    }
+    .env-checkbox-card:hover {
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    .env-checkbox-card.checked:hover,
+    .env-checkbox-card:has(input[type="checkbox"]:checked):hover {
+        border-color: var(--orange-light);
+    }
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const cards = document.querySelectorAll('.env-checkbox-card');
+    cards.forEach(card => {
+        const cb = card.querySelector('input[type="checkbox"]');
+        const updateCard = () => {
+            if (cb.checked) {
+                card.classList.add('checked');
+            } else {
+                card.classList.remove('checked');
+            }
+        };
+        cb.addEventListener('change', updateCard);
+        updateCard(); // init
+    });
+});
+</script>
 {% endblock %}

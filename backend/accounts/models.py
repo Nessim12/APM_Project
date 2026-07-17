@@ -45,3 +45,31 @@ class SupportMessage(models.Model):
 
     def __str__(self):
         return f'{self.subject} — {self.sender}'
+
+
+class UserActivityLog(models.Model):
+    class ActionChoices(models.TextChoices):
+        LOGIN = 'LOGIN', _('Connexion')
+        LOGOUT = 'LOGOUT', _('Déconnexion')
+        ACCESS = 'ACCESS', _('Accès Page')
+        ACTION = 'ACTION', _('Action')
+
+    user = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.CASCADE,
+        related_name='activity_logs',
+        null=True,
+        blank=True
+    )
+    action = models.CharField(max_length=20, choices=ActionChoices.choices, default=ActionChoices.ACCESS)
+    path = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        user_str = self.user.username if self.user else "Visiteur anonyme"
+        return f"{user_str} — {self.get_action_display()} — {self.created_at}"

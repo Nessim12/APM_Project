@@ -272,25 +272,7 @@ body > * {
     color: var(--text-main);
 }
 
-.profile-trigger {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid rgba(29, 79, 168, 0.35);
-    background: var(--gradient-brand);
-    color: white;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    flex-shrink: 0;
-    justify-self: end;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.profile-trigger:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 16px rgba(29, 79, 168, 0.35);
-}
+/* Removed old circular profile-trigger styling that clashed with the pill layout */
 
 /* Profile slide panel */
 .profile-overlay {
@@ -485,6 +467,8 @@ body > * {
     align-items: center;
     gap: 0.75rem;
     min-height: 44px;
+    width: auto;
+    height: auto;
     padding: 0.35rem 0.9rem 0.35rem 0.35rem;
     border-radius: 999px;
     border: 1px solid var(--border);
@@ -492,6 +476,8 @@ body > * {
     color: var(--text-main);
     box-shadow: 0 8px 24px rgba(29, 79, 168, 0.08);
     cursor: pointer;
+    flex-shrink: 0;
+    justify-self: end;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -1389,7 +1375,17 @@ option {
         min-height: 420px;
     }
 
-    .profile-trigger-label {
-        display: none;
+    .profile-trigger-label,
+    .profile-trigger-caret {
+        display: none !important;
+    }
+
+    .profile-trigger {
+        width: 44px !important;
+        height: 44px !important;
+        min-height: auto !important;
+        padding: 0.35rem !important;
+        border-radius: 50% !important;
+        justify-content: center !important;
     }
 }
