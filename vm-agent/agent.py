@@ -7,7 +7,7 @@ import requests
 import platform
 
 # Configuration
-API_BASE_URL = os.environ.get('API_BASE_URL', 'http://192.168.1.15:8000/api/vm')
+API_BASE_URL = os.environ.get('API_BASE_URL', 'http://192.168.1.17:8000/api/vm')
 INTERVAL = 30  # seconds
 
 

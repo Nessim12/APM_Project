@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: apm-project
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: apm-project
+
+  template:
+    metadata:
+      labels:
+        app: apm-project
+
+    spec:
+      containers:
+      - name: django
+        image: nessim04194/apm_project:latest
+        imagePullPolicy: Always
+
+        ports:
+        - containerPort: 8000
+
+        env:
+        - name: USE_SQLITE
+          value: "0"
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10

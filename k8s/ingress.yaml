@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: apm-project-ingress
+
+spec:
+  rules:
+  - host: apm.local
+
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+
+        backend:
+          service:
+            name: apm-project-service
+            port:
+              number: 8000
