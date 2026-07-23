@@ -22,7 +22,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.utils import timezone
 
-from .models import SupportMessage, User
+from .models import SupportMessage, User, UserActivityLog
 from .forms import UserForm, ProfileForm, ExcelImportForm, UserFilterForm
 
 
@@ -152,14 +152,47 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
 
 @login_required
 def dashboard(request):
-    users_list = User.objects.exclude(is_superuser=True)
-    
+    view = request.GET.get('view', 'users')
+    show_logs = can_manage_users(request.user) and view == 'logs'
+    show_users = (request.user.role == User.RoleChoices.ADMIN and view != 'logs') or request.GET.get('view') == 'users'
+
     filter_form = UserFilterForm(request.GET)
+    q = None
+    role = None
+    statut = None
     if filter_form.is_valid():
         data = filter_form.cleaned_data
+        q = data.get('q')
+        role = data.get('role')
+        statut = data.get('statut')
+
+    logs = None
+    users = None
+    page_obj = None
+
+    if show_logs:
+        logs_list = UserActivityLog.objects.select_related('user').all()
+        if q:
+            logs_list = logs_list.filter(
+                Q(user__username__icontains=q) |
+                Q(user__matricule__icontains=q) |
+                Q(user__first_name__icontains=q) |
+                Q(user__last_name__icontains=q) |
+                Q(user__email__icontains=q) |
+                Q(path__icontains=q) |
+                Q(description__icontains=q) |
+                Q(ip_address__icontains=q)
+            )
+        if role:
+            logs_list = logs_list.filter(user__role=role)
         
-        if data.get('q'):
-            q = data['q']
+        paginator = Paginator(logs_list, 15)  # 15 logs per page is ideal
+        page_number = request.GET.get('page')
+        logs = paginator.get_page(page_number)
+        page_obj = logs
+    else:
+        users_list = User.objects.exclude(is_superuser=True)
+        if q:
             users_list = users_list.filter(
                 Q(matricule__icontains=q) |
                 Q(first_name__icontains=q) |
@@ -167,22 +200,24 @@ def dashboard(request):
                 Q(email__icontains=q) |
                 Q(departement__icontains=q)
             )
-            
-        if data.get('role'):
-            users_list = users_list.filter(role=data['role'])
-            
-        if data.get('statut'):
-            # statut: '1' -> Actif, '0' -> Inactif
-            is_active = True if data['statut'] == '1' else False
+        if role:
+            users_list = users_list.filter(role=role)
+        if statut:
+            is_active = True if statut == '1' else False
             users_list = users_list.filter(is_active=is_active)
-    
-    # Sort
-    sort_by = request.GET.get('sort', '-date_joined')
-    valid_sorts = ['matricule', '-matricule', 'first_name', '-first_name', 'email', '-email', 'departement', '-departement', 'role', '-role', 'is_active', '-is_active', 'date_joined', '-date_joined']
-    if sort_by in valid_sorts:
-        users_list = users_list.order_by(sort_by)
-    else:
-        users_list = users_list.order_by('-date_joined')
+
+        # Sort
+        sort_by = request.GET.get('sort', '-date_joined')
+        valid_sorts = ['matricule', '-matricule', 'first_name', '-first_name', 'email', '-email', 'departement', '-departement', 'role', '-role', 'is_active', '-is_active', 'date_joined', '-date_joined']
+        if sort_by in valid_sorts:
+            users_list = users_list.order_by(sort_by)
+        else:
+            users_list = users_list.order_by('-date_joined')
+
+        paginator = Paginator(users_list, 5)
+        page_number = request.GET.get('page')
+        users = paginator.get_page(page_number)
+        page_obj = users
 
     def get_sort_url(field):
         p = request.GET.copy()
@@ -203,10 +238,6 @@ def dashboard(request):
         'is_active': get_sort_url('is_active'),
     }
 
-    paginator = Paginator(users_list, 5)
-    page_number = request.GET.get('page')
-    users = paginator.get_page(page_number)
-    
     params = request.GET.copy()
     if 'page' in params:
         del params['page']
@@ -215,12 +246,15 @@ def dashboard(request):
 
     return render(request, 'accounts/dashboard.html', {
         'users': users, 
-        'page_obj': users, 
+        'logs': logs,
+        'page_obj': page_obj, 
         'url_params': url_params_str,
         'filter_form': filter_form,
-        'sort_by': sort_by,
+        'sort_by': request.GET.get('sort', '-date_joined'),
         'sort_urls': sort_urls,
         'can_manage_users': can_manage_users(request.user),
+        'show_users_table': can_manage_users(request.user) and show_users,
+        'show_logs_table': show_logs,
         'current_role': request.user.role,
     })
 

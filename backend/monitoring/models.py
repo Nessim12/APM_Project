@@ -20,6 +20,39 @@ class VirtualMachine(models.Model):
             return "Offline"
         return "Online"
 
+    @property
+    def current_cpu(self):
+        latest = self.metrics.first()
+        return latest.cpu_usage if latest else 0.0
+
+    @property
+    def current_ram(self):
+        latest = self.metrics.first()
+        return latest.ram_usage if latest else 0.0
+
+    @property
+    def current_disk(self):
+        latest = self.metrics.first()
+        return latest.disk_usage if latest else 0.0
+
+    @property
+    def alerts(self):
+        latest = self.metrics.first()
+        if not latest:
+            return "No data"
+        
+        alerts = []
+        if latest.cpu_usage > 80.0:
+            alerts.append(f"CPU High ({latest.cpu_usage}%)")
+        if latest.ram_usage > 80.0:
+            alerts.append(f"RAM High ({latest.ram_usage}%)")
+        if latest.disk_usage > 80.0:
+            alerts.append(f"Disk High ({latest.disk_usage}%)")
+            
+        if alerts:
+            return " | ".join(alerts)
+        return "Normal"
+
     def __str__(self):
         return self.hostname
 

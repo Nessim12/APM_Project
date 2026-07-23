@@ -147,19 +147,21 @@
       }
       .profile-trigger {
         justify-self: end;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            min-height: 44px;
-            padding: 0.35rem 0.9rem 0.35rem 0.35rem;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            background: var(--btn-bg, rgba(255,255,255,0.08));
-            color: var(--text-main);
-            box-shadow: var(--btn-shadow, 0 4px 16px rgba(0,0,0,0.2));
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-        }
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-height: 44px;
+        width: auto !important;
+        height: auto !important;
+        padding: 0.35rem 0.9rem 0.35rem 0.35rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--btn-bg, rgba(255,255,255,0.08));
+        color: var(--text-main);
+        box-shadow: var(--btn-shadow, 0 4px 16px rgba(0,0,0,0.2));
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      }
       .profile-trigger:hover {
          transform: translateY(-1px);
             border-color: var(--accent);
@@ -373,15 +375,14 @@
     {% if user.is_authenticated %}
     <nav class="top-navbar">
       <a href="{% url 'dashboard' %}" class="navbar-brand">APM Panel</a>
-      {% if user.role != 'ADMIN' %}
       <ul class="navbar-nav">
-
+        {% if user.role != 'ADMIN' %}
         <li>
-          <details class="nav-dropdown" id="contractsDropdown">
-            <summary id="contractsDropdownLink" class="nav-item nav-dropdown-trigger">
-              <span>Gestion des Contrats</span>
+          <details class="nav-dropdown" id="gestionsDropdown">
+            <summary id="gestionsDropdownLink" class="nav-item nav-dropdown-trigger">
+              <span>Gestions</span>
               <span
-                id="contractsDropdownToggleBtn"
+                id="gestionsDropdownToggleBtn"
                 class="nav-dropdown-toggle"
                 aria-hidden="true"
                 >▾</span
@@ -389,10 +390,34 @@
             </summary>
             <div
               class="nav-dropdown-menu"
-              id="contractsDropdownMenu"
+              id="gestionsDropdownMenu"
               role="menu"
-              aria-labelledby="contractsDropdownToggleBtn"
+              aria-labelledby="gestionsDropdownToggleBtn"
             >
+              <a
+                href="{% url 'application_list' %}"
+                class="nav-dropdown-item"
+                role="menuitem"
+                ><span class="nav-item-icon">🖥️</span><span>Applications</span></a
+              >
+              <a
+                href="{% url 'environment_list' %}"
+                class="nav-dropdown-item"
+                role="menuitem"
+                ><span class="nav-item-icon">⚙️</span><span>Environnements</span></a
+              >
+              <a
+                href="{% url 'ssl_list' %}"
+                class="nav-dropdown-item"
+                role="menuitem"
+                ><span class="nav-item-icon">🔒</span><span>SSL</span></a
+              >
+              <a
+                href="{% url 'domaine_list' %}"
+                class="nav-dropdown-item"
+                role="menuitem"
+                ><span class="nav-item-icon">🌐</span><span>Domaines</span></a
+              >
               <a
                 href="{% url 'contrats:contrat_dashboard' %}"
                 class="nav-dropdown-item"
@@ -408,26 +433,24 @@
             </div>
           </details>
         </li>
-        {% endif %}
-
-        {% if user.role in 'ADMIN,ADMIN_SYS' %}
-        <li>
-          <a href="{% url 'dashboard' %}" class="nav-item">Utilisateurs</a>
-        </li>
-        <li>
-          <a href="{% url 'application_list' %}" class="nav-item">Applications</a>
-        </li>
-        <li>
-          <a href="{% url 'ssl_list' %}" class="nav-item">SSL</a>
-        </li>
-        {% endif %}
-
-        {% if user.role != 'ADMIN' %}
         <li>
           <a href="{% url 'document_list' %}" class="nav-item">Documentation</a>
         </li>
+        {% if user.role == 'ADMIN_SYS' %}
+        <li>
+          <a href="{% url 'monitoring_dashboard' %}" class="nav-item">Monitoring</a>
+        </li>
+        {% endif %}
+        {% endif %}
+        {% if user.role == 'ADMIN' %}
+        <li>
+          <a href="{% url 'dashboard' %}?view=users" class="nav-item {% if request.GET.view != 'logs' %}active{% endif %}">Utilisateurs</a>
+        </li>
+        <li>
+          <a href="{% url 'dashboard' %}?view=logs" class="nav-item {% if request.GET.view == 'logs' %}active{% endif %}">Suivi d'activité</a>
+        </li>
+        {% endif %}
       </ul>
-      {% endif %}
       <div class="navbar-actions">
         {% if user.role == 'TECH' %}
         <a href="{% url 'support_message_create' %}" class="nav-support-link" aria-label="Envoyer un message">✉</a>
@@ -766,38 +789,30 @@
     </script>
     -->
     <script>
-      // Dropdown Contracts: toggle on click, close on outside click
+      // Dropdown toggle & close on outside click
       document.addEventListener("DOMContentLoaded", () => {
-        const dropdownTrigger = document.getElementById("contractsDropdownLink");
-        const toggle = document.getElementById("contractsDropdownToggleBtn");
-        const menu = document.getElementById("contractsDropdownMenu");
-        const container = document.getElementById("contractsDropdown");
-        if (!dropdownTrigger || !toggle || !menu || !container) return;
-
-        function openMenu() {
-          container.classList.add("open");
-          dropdownTrigger.setAttribute("aria-expanded", "true");
-        }
-
-        function closeMenu() {
-          container.classList.remove("open");
-          dropdownTrigger.setAttribute("aria-expanded", "false");
-        }
-
-        dropdownTrigger.addEventListener("click", (e) => {
-          const expanded =
-            dropdownTrigger.getAttribute("aria-expanded") === "true";
-          if (expanded) {
-            closeMenu();
-          } else {
-            openMenu();
-          }
+        const dropdowns = document.querySelectorAll(".nav-dropdown");
+        
+        dropdowns.forEach(container => {
+          const trigger = container.querySelector(".nav-dropdown-trigger");
+          if (!trigger) return;
+          
+          trigger.addEventListener("click", (e) => {
+            const isOpen = container.hasAttribute("open");
+            trigger.setAttribute("aria-expanded", !isOpen ? "true" : "false");
+          });
         });
 
         document.addEventListener("click", (e) => {
-          if (!container.contains(e.target)) {
-            closeMenu();
-          }
+          dropdowns.forEach(container => {
+            if (!container.contains(e.target)) {
+              container.removeAttribute("open");
+              const trigger = container.querySelector(".nav-dropdown-trigger");
+              if (trigger) {
+                trigger.setAttribute("aria-expanded", "false");
+              }
+            }
+          });
         });
       });
     </script>
@@ -825,5 +840,6 @@
         });
       });
     </script>
+    {% block extra_scripts %}{% endblock %}
   </body>
 </html>

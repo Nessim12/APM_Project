@@ -13,6 +13,18 @@ def _user_queryset():
 class ApplicationForm(forms.ModelForm):
     """Formulaire de création et de modification d'une application."""
 
+    environnements = forms.MultipleChoiceField(
+        choices=[
+            ('DEV', 'DEV'),
+            ('RECETTE', 'RECETTE'),
+            ('PREPROD', 'PREPROD'),
+            ('PROD', 'PROD'),
+        ],
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-checkbox-list'}),
+        required=False,
+        label="Environnements associés"
+    )
+
     class Meta:
         model = Application
         fields = [
@@ -49,6 +61,12 @@ class ApplicationForm(forms.ModelForm):
             self.fields[field_name].queryset = users
             self.fields[field_name].required = True
 
+        # Initialiser les environnements
+        if self.instance.pk:
+            self.fields['environnements'].initial = list(
+                self.instance.environnements.filter(nom__in=['DEV', 'RECETTE', 'PREPROD', 'PROD']).values_list('nom', flat=True)
+            )
+
         # Le statut « Archivé » n'est pas sélectionnable manuellement via le formulaire
         statut_choices = [
             (value, label)
@@ -58,11 +76,46 @@ class ApplicationForm(forms.ModelForm):
         self.fields['statut'].choices = statut_choices
 
         for field_name in self.fields:
-            if field_name not in ('date_fin_vie', 'has_ssl', 'date_mise_en_production'):
+            if field_name not in ('date_fin_vie', 'has_ssl', 'date_mise_en_production', 'environnements'):
                 self.fields[field_name].required = True
         self.fields['date_fin_vie'].required = False
         self.fields['has_ssl'].required = False
         self.fields['date_mise_en_production'].required = False
+
+    def save(self, commit=True):
+        application = super().save(commit=commit)
+        if commit:
+            self.save_environnements(application)
+        else:
+            original_save_m2m = self.save_m2m
+            def save_m2m_with_envs():
+                original_save_m2m()
+                self.save_environnements(application)
+            self.save_m2m = save_m2m_with_envs
+        return application
+
+    def save_environnements(self, application):
+        selected_envs = self.cleaned_data.get('environnements', [])
+        existing_envs = {env.nom: env for env in application.environnements.all()}
+        
+        from environments.models import Environnement
+        for env_name in selected_envs:
+            if env_name not in existing_envs:
+                Environnement.objects.create(
+                    nom=env_name,
+                    application=application,
+                    url=f'http://localhost/{application.nom.lower().replace(" ", "-")}-{env_name.lower()}',
+                    adresse_ip='127.0.0.1',
+                    os='Linux',
+                    cpu='2 vCPU',
+                    ram='4 Go',
+                    hebergeur='Interne',
+                    type_hebergement='ON_PREMISE'
+                )
+        
+        for env_name, env in existing_envs.items():
+            if env_name in ['DEV', 'RECETTE', 'PREPROD', 'PROD'] and env_name not in selected_envs:
+                env.delete()
 
     def clean_nom(self):
         nom = self.cleaned_data.get('nom', '').strip()
