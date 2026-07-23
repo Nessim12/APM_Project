@@ -3,3 +3,5 @@ psycopg2-binary>=2.9.0
 openpyxl==3.1.5
 django-storages[boto3]>=1.14.4
 djangorestframework>=3.14.0
+prometheus-client>=0.20.0
+
